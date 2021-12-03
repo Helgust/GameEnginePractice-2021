@@ -146,7 +146,7 @@ void RenderThread::ProcessCommands()
 		}
 	}
 
-	m_Commands[m_nCurrentFrame].shrink_to_fit();
+	m_Commands[m_nCurrentFrame].clear();
 }
 
 // We process comands via byte* using std::vector as raw data.
@@ -168,14 +168,17 @@ byte* RenderThread::AddCommand(RenderCommand eRC, size_t nParamBytes)
 	memcpy(m_Commands[m_nFrameFill].data(), storage, m_Commands[m_nFrameFill].capacity() - cmdSize);
 
 	byte* ptr = m_Commands[m_nFrameFill].data() + m_Commands[m_nFrameFill].capacity() * sizeof(byte) - cmdSize;
+
+	/*byte* ptr = m_Commands[m_nFrameFill].Resize(m_Commands[m_nFrameFill].Capacity() * sizeof(byte) + cmdSize);*/
 	AddRawData(ptr, eRC);
-	delete[] storage;
 	return ptr;
 }
+
 
 template<typename T>
 void RenderThread::AddRawData(byte*& ptr, const T Val)
 {
+	static_assert(std::is_trivially_copyable_v<T>);
 	*(T*)ptr = Val;
 	ptr += sizeof(T);
 }
@@ -284,6 +287,7 @@ void RenderThread::SyncMainWithRender()
 	{
 		LOADINGCOMMAND_CRITICAL_SECTION;
 		NextFrame();
+		//m_Commands[m_nFrameFill].clear();
 		m_Commands[m_nFrameFill].shrink_to_fit();
 	}
 

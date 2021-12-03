@@ -20,11 +20,16 @@ InputHandler::InputHandler(const std::string& strResourceRoot)
 	MapSymbol("right", VK_RIGHT);
 	MapSymbol("up", VK_UP);
 	MapSymbol("down", VK_DOWN);
+	MapSymbol("lmb", VK_LBUTTON);
+	MapSymbol("rmb", VK_RBUTTON);
+
 
 	MapCommandSymbol("TurnLeft", eIC_TurnLeft, "a");
 	MapCommandSymbol("TurnRight", eIC_TurnRight, "d");
-	MapCommandSymbol("MoveForward", eIC_MoveForward, "w");
-	MapCommandSymbol("MoveBack", eIC_MoveBack, "s");
+	MapCommandSymbol("MoveForward", eIC_MoveForward, "lmb");
+	MapCommandSymbol("MoveBack", eIC_MoveBack, "rmb");
+
+	
 
 	LoadConfiguration();
 
@@ -98,6 +103,32 @@ void InputHandler::Update()
 	{
 		m_InputState.set(it.second, IsKeyDown(it.first));
 	}
+
+	if (m_pWinHandle)
+	{
+		m_pPrevMousePos = m_pCurMousePos;
+
+		GetCursorPos(&m_pMousePoint);
+		ScreenToClient(m_pWinHandle, &m_pMousePoint);
+
+		float x = float(m_pMousePoint.x);
+		float y = float(m_pMousePoint.y);
+		m_pCurMousePos = Ogre::Vector2(x, y);
+
+		m_bLMouseButtonDown = GetKeyState(VK_LBUTTON) < 0;
+		m_bRMouseButtonDown = GetKeyState(VK_RBUTTON) < 0;
+	}
+}
+
+void InputHandler::SetWinHandle(HWND window)
+{
+	m_pWinHandle = window;
+	GetCursorPos(&m_pMousePoint);
+	ScreenToClient(m_pWinHandle, &m_pMousePoint);
+
+	float x = float(m_pMousePoint.x);
+	float y = float(m_pMousePoint.y);
+	m_pCurMousePos = Ogre::Vector2(x, y);
 }
 
 const std::bitset<eIC_Max>& InputHandler::GetInputState() const
@@ -108,4 +139,54 @@ const std::bitset<eIC_Max>& InputHandler::GetInputState() const
 bool InputHandler::IsCommandActive(EInputCommand inputCommand) const
 {
 	return m_InputState.test(inputCommand);
+}
+
+Ogre::Vector2 InputHandler::MousePos() const
+{
+	return m_pCurMousePos;
+}
+
+Ogre::Vector2 InputHandler::DeltaMousePos() const
+{
+	Ogre::Vector2 diff = m_pCurMousePos - m_pPrevMousePos;
+	return Ogre::Vector2(diff.x, -diff.y);
+}
+
+Ogre::Vector2 InputHandler::DeltaDownMousePos() const
+{
+	if (m_bLMouseButtonDown)
+	{
+		return DeltaMousePos();
+	}
+	else
+		return Ogre::Vector2(0, 0);
+}
+
+//void InputHandler::FillSymbolMap()
+//{
+//	// Key name in file to enum mapping
+//	MapSymbol("a", A_KEY);
+//	MapSymbol("d", D_KEY);
+//	MapSymbol("w", W_KEY);
+//	MapSymbol("s", A_KEY);
+//	MapSymbol("q", Q_KEY);
+//}
+
+void InputHandler::FillCommandMap()
+{
+	// Name of command to enum mapping
+	/*MapInputEvent(eIC_GoLeft,"GoLeft");
+	MapInputEvent("GoRight", eIC_GoRight);
+	MapInputEvent("GoUp", eIC_GoUp);
+	MapInputEvent("GoDown", eIC_GoDown);
+	MapInputEvent("Shoot", eIC_Shoot);*/
+}
+
+void InputHandler::FillCommandSymbolMap()
+{
+	//MapCommandSymbol("GoLeft", "a");
+	//MapCommandSymbol("GoRight", "d");
+	//MapCommandSymbol("GoUp", "w");
+	//MapCommandSymbol("GoDown", "s");
+	//MapCommandSymbol("Shoot", "q");
 }

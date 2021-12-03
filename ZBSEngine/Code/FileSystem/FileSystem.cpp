@@ -36,3 +36,24 @@ const std::string& FileSystem::GetSavesRoot()
 {
 	return m_strSavesRoot;
 }
+
+void FileSystem::CreateInitMapOfFiles()
+{
+	for (const auto& entry : std::filesystem::directory_iterator(GetScriptsRoot()))
+	{
+		m_mapFileReport[entry.path()] = entry.last_write_time();
+	}
+}
+
+void FileSystem::Update(EntityManager* entityManager)
+{
+	for (const auto& entry : std::filesystem::directory_iterator(GetScriptsRoot()))
+	{
+		if (entry.last_write_time() != m_mapFileReport[entry.path()])
+		{
+			//entityManager->GetEntityQueue();
+			m_mapFileReport[entry.path()] = entry.last_write_time();
+
+		}
+	}
+}

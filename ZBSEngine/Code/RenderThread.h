@@ -3,6 +3,7 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
+#include <atomic>
 #include "MTQueue.h"
 #include "ProjectDefines.h"
 
@@ -44,12 +45,13 @@ private:
 	threadID m_nRenderThreadId;
 	threadID m_nMainThreadId;
 
-	volatile UINT32 m_nFlush;
+	std::atomic<UINT32> m_nFlush;
 
 	std::unique_ptr<std::thread> m_pThread;
 
 	RenderEngine* m_pRenderEngine;
 
+	//MTQueue<byte> m_Commands[2];
 	std::vector<byte> m_Commands[2];
 	int m_nCurrentFrame;
 	int m_nFrameFill;

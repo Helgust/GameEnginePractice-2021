@@ -36,7 +36,7 @@ namespace luabridge {
 	};
 
 }
-
+class GEFile;
 class ScriptNode
 {
 public:
@@ -52,6 +52,7 @@ public:
 	Ogre::Vector3 GetCameraPosition() const;
 	Ogre::Quaternion GetOrientation() const;
 	std::string GetMeshName() const;
+	std::string GetPath() const;
 	bool GetIsStatic() const;
 
 private:

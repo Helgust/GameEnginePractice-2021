@@ -87,39 +87,47 @@ void RenderEngine::Update()
 
 void RenderEngine::RT_Init()
 {
-	m_pRoot = OGRE_NEW Ogre::Root();
-	m_pD3D11Plugin = OGRE_NEW Ogre::D3D11Plugin();
-
-	m_pRoot->installPlugin(m_pD3D11Plugin);
-
-	if (!SetOgreConfig())
+	if (!m_pRoot)
 	{
-		m_bQuit = true;
-		return;
+		m_pRoot = OGRE_NEW Ogre::Root();
+		m_pD3D11Plugin = OGRE_NEW Ogre::D3D11Plugin();
+
+		m_pRoot->installPlugin(m_pD3D11Plugin);
+
+		if (!SetOgreConfig())
+		{
+			m_bQuit = true;
+			return;
+		}
+
+		m_pRoot->initialise(false);
+
+		// Creating window
+		Ogre::uint32 width = 1280;
+		Ogre::uint32 height = 720;
+		Ogre::String sTitleName = "Game Engine";
+
+		m_pRenderWindow = Ogre::Root::getSingleton().createRenderWindow(sTitleName, width, height, false);
+		m_pRenderWindow->getCustomAttribute("WINDOW", &m_pHWND);
+		// Scene manager
+		m_pSceneManager = m_pRoot->createSceneManager(Ogre::SceneType::ST_GENERIC, 1);
 	}
-
-	m_pRoot->initialise(false);
-
-	// Creating window
-	Ogre::uint32 width = 1280;
-	Ogre::uint32 height = 720;
-	Ogre::String sTitleName = "Game Engine";
-
-	m_pRenderWindow = Ogre::Root::getSingleton().createRenderWindow(sTitleName, width, height, false);
-
-	// Scene manager
-	m_pSceneManager = m_pRoot->createSceneManager(Ogre::SceneType::ST_GENERIC, 1);
+	
 }
 
 void RenderEngine::RT_SetupDefaultCamera()
 {
-	m_pCamera = m_pSceneManager->createCamera("Main Camera");
+	if (!m_pCamera)
+	{
+		m_pCamera = m_pSceneManager->createCamera("Main Camera");
 
-	m_pCamera->setPosition(Ogre::Vector3(0, 10, 35));
-	m_pCamera->lookAt(Ogre::Vector3(0, 0, 0));
-	m_pCamera->setNearClipDistance(0.2f);
-	m_pCamera->setFarClipDistance(1000.0f);
-	m_pCamera->setAutoAspectRatio(true);
+		m_pCamera->setPosition(Ogre::Vector3(0, 10, 35));
+		m_pCamera->lookAt(Ogre::Vector3(0, 0, 0));
+		m_pCamera->setNearClipDistance(0.2f);
+		m_pCamera->setFarClipDistance(1000.0f);
+		m_pCamera->setAutoAspectRatio(true);
+	}
+	
 }
 
 void RenderEngine::RT_SetupDefaultCompositor()

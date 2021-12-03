@@ -112,6 +112,11 @@ std::string ScriptNode::GetMeshName() const
 	return meshName.cast<std::string>();
 }
 
+std::string ScriptNode::GetPath() const
+{
+	return m_strScriptPath;
+}
+
 void ScriptNode::ReloadScript()
 {
 	luabridge::LuaRef currentObject = luabridge::getGlobal(m_script, m_EntityFieldName);

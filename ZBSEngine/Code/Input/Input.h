@@ -6,7 +6,7 @@ enum EInputCommand : size_t
 	eIC_TurnRight,
 	eIC_MoveForward,
 	eIC_MoveBack,
+	eIC_HotReloadScript,
 
 	eIC_Max
 };
-

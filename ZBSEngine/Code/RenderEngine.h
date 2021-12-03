@@ -32,6 +32,9 @@ public:
 
 	RenderThread* GetRT() const { return m_pRT; }
 
+	HWND GetWinHandle() { return m_pHWND; }
+
+
 private:
 	bool SetOgreConfig();
 
@@ -55,6 +58,7 @@ private:
 	ResourceManager* m_pResourceManager;
 
 	std::vector<RenderNode*> m_RenderNodes;
+	HWND m_pHWND;
 
 	bool m_bQuit;
 };

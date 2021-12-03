@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ScriptNode.h"
+class ScriptNode;
 
 class ScriptSystem
 {
@@ -8,6 +9,7 @@ public:
 	ScriptSystem(InputHandler* pInputHandler, std::string strScriptsRoot);
 	~ScriptSystem();
 	ScriptSystem(const ScriptSystem&) = delete;
+
 	ScriptSystem& operator=(const ScriptSystem&) = delete;
 
 	ScriptNode* CreateScriptNode(std::string strScriptName, flecs::entity entity);

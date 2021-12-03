@@ -30,6 +30,8 @@ Game::Game()
 	register_ecs_phys_systems(m_pEcs);
 	register_ecs_script_systems(m_pEcs);
 	register_ecs_static_systems(m_pEcs);
+
+	m_pFileSystem->CreateInitMapOfFiles();
 }
 
 Game::~Game()
@@ -52,11 +54,20 @@ void Game::Run()
 	{
 		m_pRenderEngine->GetRT()->RC_BeginFrame();
 
+		m_pInputHandler->SetWinHandle(m_pRenderEngine->GetWinHandle());
+
 		m_Timer.Tick();
 
 		if (m_pInputHandler)
+		{
 			m_pInputHandler->Update();
+		}
 
+		if (GetKeyState(VK_F8) < 0)
+		{
+			m_pEntityManager->ReloadScripts(m_pFileSystem);
+		}
+			
 		if (!Update())
 			break;
 		if (m_pRenderEngine->GetQuit())
@@ -69,5 +80,6 @@ void Game::Run()
 bool Game::Update()
 {
 	m_pEcs->progress();
+
 	return true;
 }

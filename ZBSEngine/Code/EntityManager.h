@@ -2,7 +2,13 @@
 
 #include "ScriptSystem/ScriptSystem.h"
 #include "LoadingSystem/LoadingSystem.h"
+#include "FileSystem/FileSystem.h"
+
 #include "string.h"
+#include <filesystem>
+
+class FileSystem;
+class ScriptSystem;
 
 struct EntityInfo
 {
@@ -32,8 +38,10 @@ public:
 
 	void CreateEntity(std::string strScriptName);
 	void CreateEntity(const EntityInfo &fromSave);
+	void ReloadScripts(FileSystem* m_pFileSystem);
 
 	std::unordered_map<uint32_t, Entity> GetEntityQueue() const;
+	void Update();
 
 private:
 	ScriptSystem* m_pScriptSystem;

@@ -66,6 +66,19 @@ void EntityManager::CreateEntity(const EntityInfo &fromSave)
 	m_entityQueue[nIndex] = entity;
 }
 
+void EntityManager::ReloadScripts(FileSystem* m_pFileSystem)
+{
+	for (auto x : m_entityQueue)
+	{
+		std::string file_path = x.second.pScriptNode->GetPath();
+		auto file_last_time = m_pFileSystem->m_mapFileReport[file_path];
+		if (std::filesystem::last_write_time(file_path) != file_last_time)
+		{
+			x.second.pScriptNode->ReloadScript();
+		}
+	}
+}
+
 uint32_t EntityManager::GetNewIndex() const
 {
 	return m_entityQueue.size();
