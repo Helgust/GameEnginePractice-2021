@@ -74,7 +74,10 @@ void EntityManager::ReloadScripts(FileSystem* m_pFileSystem)
 		auto file_last_time = m_pFileSystem->m_mapFileReport[file_path];
 		if (std::filesystem::last_write_time(file_path) != file_last_time)
 		{
+			//ScriptNode* temp = x.second.pScriptNode;
+			//x.second.pScriptNode = m_pScriptSystem->CreateScriptNode(std::filesystem::path,);
 			x.second.pScriptNode->ReloadScript();
+			m_pFileSystem->m_mapFileReport[file_path] = std::filesystem::last_write_time(file_path);
 		}
 	}
 }

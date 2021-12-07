@@ -1,6 +1,7 @@
 #include "ScriptNode.h"
 
 #include <algorithm>
+#include <string>
 
 ScriptNode::ScriptNode(std::string strScriptPath, InputHandler* pInputHandler, flecs::entity& ent) :
 	m_pInputHandler(pInputHandler),
@@ -103,6 +104,15 @@ Ogre::Quaternion ScriptNode::GetOrientation() const
 	return vOrientation;
 }
 
+void ScriptNode::SetNewOrientation(Ogre::Quaternion orientation)
+{
+	luabridge::LuaRef object = luabridge::getGlobal(m_script, m_EntityFieldName);
+	Ogre::Radian sd = orientation.getYaw();
+	object[m_SetNewOrientationFunctionName](sd);
+
+
+}
+
 std::string ScriptNode::GetMeshName() const
 {
 	luabridge::LuaRef object = luabridge::getGlobal(m_script, m_EntityFieldName);
@@ -120,18 +130,27 @@ std::string ScriptNode::GetPath() const
 void ScriptNode::ReloadScript()
 {
 	luabridge::LuaRef currentObject = luabridge::getGlobal(m_script, m_EntityFieldName);
+	Ogre::Vector3 vPosition = GetPosition();
+	Ogre::Quaternion vOrientation = GetOrientation();
 
 	lua_State* script = luaL_newstate();
 	luaL_openlibs(script);
 
 	AddDependencies(script);
 
-	luaL_dofile(script, m_strScriptPath.c_str());
-	lua_pcall(script, 0, 0, 0);
+	m_script = script;
+
+	luaL_openlibs(m_script);
+
+	AddDependencies(m_script);
+
+	luaL_dofile(m_script, m_strScriptPath.c_str());
+	lua_pcall(m_script, 0, 0, 0);
 
 	luabridge::LuaRef object = luabridge::getGlobal(script, m_EntityFieldName);
-	luabridge::LuaRef parameters = object[m_ParametersFieldName];
+	luabridge::LuaRef parameters = currentObject[m_ParametersFieldName];
 	luabridge::Range parametersRange = luabridge::pairs(parameters);
+
 
 	if (parameters.isNil())
 	{
@@ -144,8 +163,12 @@ void ScriptNode::ReloadScript()
 	{
 		strParameterName = it.key().cast<std::string>();
 		fValue = it.value().cast<float>();
-		currentObject[m_ParametersFieldName][strParameterName] = fValue;
+		object[m_ParametersFieldName][strParameterName] = fValue;
 	}
+	SetNewOrientation(vOrientation);
+	SetPosition(vPosition);
+	
+	
 }
 
 bool ScriptNode::GetIsStatic() const 
@@ -177,7 +200,12 @@ void ScriptNode::AddDependencies(lua_State* L)
 		.addFunction("__add", (Ogre::Radian(Ogre::Radian::*)(const Ogre::Radian&) const) &Ogre::Radian::operator+)
 		.endClass()
 		.beginClass<Ogre::Quaternion>("Quaternion")
+		.addConstructor<void(*) (const Ogre::Real&, const Ogre::Real&, const Ogre::Real&, const Ogre::Real&)>()
 		.addConstructor<void(*) (const Ogre::Radian&, const Ogre::Vector3&)>()
+		.addProperty("w", &Ogre::Quaternion::w, true)
+		.addProperty("x", &Ogre::Quaternion::x, true)
+		.addProperty("y", &Ogre::Quaternion::y, true)
+		.addProperty("z", &Ogre::Quaternion::z, true)
 		.addFunction("setOrientation", &(Ogre::Quaternion::FromAngleAxis))
 		.addFunction("__mul", (Ogre::Vector3(Ogre::Quaternion::*)(const Ogre::Vector3&) const) &Ogre::Quaternion::operator*)
 		.endClass();

@@ -46,10 +46,12 @@ public:
 	void Update(float dt);
 	void ReloadScript();
 
-	Ogre::Vector3 GetPosition() const;
+	
 	void SetPosition(Ogre::Vector3 position);
+	void SetNewOrientation(Ogre::Quaternion orientation);
 
 	Ogre::Vector3 GetCameraPosition() const;
+	Ogre::Vector3 GetPosition() const;
 	Ogre::Quaternion GetOrientation() const;
 	std::string GetMeshName() const;
 	std::string GetPath() const;
@@ -80,6 +82,7 @@ private:
 	const char* m_GetCameraOffsetFunctionName = "GetCameraOffset";
 	const char* m_SetCameraOffsetFunctionName = "SetCameraOffset";
 	const char* m_GetOrientationFunctionName = "GetOrientation";
+	const char* m_SetNewOrientationFunctionName = "SetNewOrientation";
 	const char* m_OnInitFunctionName = "OnInit";
 	const char* m_OnUpdateFunctionName = "OnUpdate";
 };

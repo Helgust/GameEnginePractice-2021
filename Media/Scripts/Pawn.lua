@@ -6,12 +6,12 @@ Entity = {
     },
     
     Parameters = {
-        move_speed = 10.0,
+        move_speed = 15.0,
         rotate_speed = 5.0,
     },
     
     Camera = {
-        offset = Vector3(20.0, 25.0, 45.0),
+        offset = Vector3(10, 20.0, 45.0),
     },
     
     up_vector = Vector3(0.0, 1.0, 0.0),
@@ -39,7 +39,7 @@ Entity.OnUpdate = function(dt)
         deltaMoveVelocity = deltaMoveVelocity + Entity.Parameters.move_speed;
     end
     if (inputHandler:isCommandActive(3)) then
-        deltaMoveVelocity = deltaMoveVelocity - Entity.Parameters.move_speed;
+        deltaMoveVelocity = deltaMoveVelocity + Entity.Parameters.move_speed;
     end
     
     deltaMoveVelocity = deltaMoveVelocity * dt;
@@ -81,4 +81,14 @@ end
 
 Entity.GetOrientation = function()
     return Entity.orientation;
+end
+
+--[[Entity.SetNewOrientation = function(w, x, y, z)
+    Entity.orientation = Quaternion(w, x, y, z);
+end
+--]]
+
+Entity.SetNewOrientation = function(r)
+	Entity.radian = Radian(0.0) + r; 
+    Entity.orientation:setOrientation(Entity.radian, Entity.up_vector);
 end
