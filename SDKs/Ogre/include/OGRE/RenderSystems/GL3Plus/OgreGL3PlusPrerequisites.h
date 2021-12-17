@@ -32,7 +32,7 @@ THE SOFTWARE.
 
 #include "OgreLogManager.h"
 
-#include "OgreGL3PlusBuildSettings.h"
+//#include "OgreGL3PlusBuildSettings.h"
 
 namespace Ogre {
     // Forward declarations
@@ -80,9 +80,9 @@ namespace Ogre {
 //#   define WGL_WGLEXT_PROTOTYPES
 #   include <windows.h>
 #   include <wingdi.h>
-#   include <GL/gl3w.h>
-#   include <GL/glext.h>
-#   include <GL/wglext.h>
+#   include <RenderSystems\GL3Plus\GL\gl3w.h>
+#   include <RenderSystems\GL3Plus\GL\glext.h>
+#   include <RenderSystems\GL3Plus\GL\wglext.h>
 #elif OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_FREEBSD
 #   include <GL/gl3w.h>
 #   include <GL/glext.h>
