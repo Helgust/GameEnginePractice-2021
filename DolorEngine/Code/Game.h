@@ -20,7 +20,6 @@ public:
 
 	void Run();
 	bool Update();
-	bool AllUpdate();
 
 private:
 	GameTimer m_Timer;

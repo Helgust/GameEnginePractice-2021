@@ -111,7 +111,6 @@ void InputHandler::ReadMappedButtonInput()
 // We used int as return type just for demonstration. It should be done another way
 void InputHandler::Update()
 {
-	
 	ReadMappedButtonInput();
 	ReadMouseInput();
 }
@@ -127,15 +126,19 @@ void InputHandler::ReadMouseInput()
 		ImGui_ImplSDL2_ProcessEvent(&event);
 		switch (event.type)
 		{
-		case SDL_QUIT:
-			m_bIsQuit = true;
-			break;
+		
 
 		case SDL_MOUSEBUTTONDOWN:
 			m_bLMouseButtonDown = event.button.button == SDL_BUTTON_LEFT;
 			break;
 		case SDL_MOUSEBUTTONUP:
-			m_bLMouseButtonDown = false;
+			if (event.button.button == SDL_BUTTON_LEFT)
+			{
+				m_bLMouseButtonDown = false;
+			}
+			break;
+		case SDL_QUIT:
+			m_bIsQuit = true;
 			break;
 		default:
 			break;

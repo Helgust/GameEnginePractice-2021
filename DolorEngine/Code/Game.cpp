@@ -11,7 +11,7 @@ Game::Game()
 	m_pFileSystem = new FileSystem();
 	m_pResourceManager = new ResourceManager(m_pFileSystem->GetMediaRoot());
 	m_pInputHandler = new InputHandler(m_pFileSystem->GetMediaRoot());
-	m_pRenderEngine = new RenderEngine(m_pResourceManager);
+	m_pRenderEngine = new RenderEngine(m_pResourceManager, m_pInputHandler, m_pFileSystem);
 	m_pScriptSystem = new ScriptSystem(m_pInputHandler, m_pFileSystem->GetScriptsRoot());
 	m_pEntityManager = new EntityManager(m_pRenderEngine, m_pScriptSystem, m_pEcs);
 	m_pLoadingSystem = new LoadingSystem(m_pEntityManager, m_pFileSystem->GetSavesRoot());
@@ -50,11 +50,11 @@ void Game::Run()
 {
 	m_Timer.Reset();
 
-	while (true)
+	while (true) // was just "true"
 	{
 		m_pRenderEngine->GetRT()->RC_BeginFrame();
 
-		m_Timer.Tick();
+		//static bool isDone = false;
 
 		if (m_pInputHandler)
 		{
@@ -65,12 +65,19 @@ void Game::Run()
 		{
 			m_pEntityManager->ReloadScripts(m_pFileSystem);
 		}
-			
-		if (!Update())
-			break;
-		if (m_pRenderEngine->GetQuit())
-			break;
 
+		m_Timer.Tick();
+
+		if (!Update())
+		{
+			break;
+		}
+
+		if (m_pInputHandler->GetQuit())
+		{
+			m_pRenderEngine->GetRT()->RC_SDLCleanup();
+			break;
+		}
 		m_pRenderEngine->GetRT()->RC_EndFrame();
 	}
 }
@@ -78,32 +85,6 @@ void Game::Run()
 bool Game::Update()
 {
 	m_pEcs->progress();
-
-	return true;
-}
-
-bool Game::AllUpdate()
-{
-	m_pRenderEngine->GetRT()->RC_BeginFrame();
-
-	static bool isDone = false;
-
-	if (m_pInputHandler)
-	{
-		m_pInputHandler->Update();
-	}
-		
-
-	m_Timer.Tick();
-
-	m_pRenderEngine->GetRT()->RC_EndFrame();
-
-	if (m_pInputHandler->GetQuit())
-	{
-		m_pRenderEngine->GetRT()->RC_SDLCleanup();
-		return false;
-	}
-	m_pRenderEngine->GetRT()->RC_EndFrame();
 
 	return true;
 }

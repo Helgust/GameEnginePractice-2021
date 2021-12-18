@@ -8,7 +8,7 @@
 
 #include <windows.h>
 #include "crc32.h"
-#include "../EntityManager.h"
+//#include "../EntityManager.h"
 
 typedef std::shared_mutex Lock;
 typedef std::unique_lock<Lock>  WriteLock;
@@ -40,7 +40,5 @@ private:
 	std::string m_strScriptsRoot;
 	std::string m_strSavesRoot;
 	
-
-
 	Lock m_RWLock;
 };

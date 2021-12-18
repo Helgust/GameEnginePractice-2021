@@ -2,7 +2,7 @@
 
 #include "../ProjectDefines.h"
 
-RenderEngine::RenderEngine(ResourceManager* pResourceManager) :
+RenderEngine::RenderEngine(ResourceManager* pResourceManager, InputHandler* pInputManager,FileSystem* pFileSystem) :
 	m_pRoot(nullptr),
 	m_pRenderWindow(nullptr),
 	m_pSceneManager(nullptr),
@@ -11,7 +11,9 @@ RenderEngine::RenderEngine(ResourceManager* pResourceManager) :
 	m_pWorkspace(nullptr),
 	m_pRT(nullptr),
 	m_bQuit(false),
-	m_pResourceManager(pResourceManager)
+	m_pResourceManager(pResourceManager),
+	m_pInputManager(pInputManager),
+	m_pFileSystem(pFileSystem)
 {
 	m_pRT = new RenderThread(this);
 
@@ -69,8 +71,6 @@ void RenderEngine::Update()
 		}
 	}
 	
-	
-
 	if (m_pRenderWindow->isVisible())
 	{
 		if (m_pRenderWindow->isClosed())
@@ -83,17 +83,114 @@ void RenderEngine::Update()
 			m_bQuit |= !m_pRoot->renderOneFrame();
 		}
 	}
+
+	SDL_PumpEvents();
+	{
+		SDL_Event event;
+		while (SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_KEYDOWN, SDL_TEXTINPUT) > 0)
+		{
+			ImGui_ImplSDL2_ProcessEvent(&event);
+		}
+	}
+
+	if (m_pInputManager->GetLMouseStatus())
+	{
+		RaycastToMouse();
+	}
+		
+	StartGuiUpdate();
+
+	DisplayMenuBar();
+	DisplayAllScripts();
+	///DisplaySelectionParameters();
+	//DisplayFreezeBtn();
+
+	EndGuiUpdate();
+
+	m_pRenderWindow->windowMovedOrResized();
 }
+
+void RenderEngine::RaycastToMouse()
+{
+	Ogre::Ray ray = m_pCamera->getCameraToViewportRay(float(m_pInputManager->MousePos().x) / m_pRenderWindow->getWidth(), float(m_pInputManager->MousePos().y) / m_pRenderWindow->getHeight());
+	Ogre::RaySceneQuery* query = m_pSceneManager->createRayQuery(ray);
+	query->setSortByDistance(true);
+
+	bool mMovableFound = false;
+	Ogre::RaySceneQueryResult& result = query->execute();
+	if (!result.empty())
+	{
+		m_bSelectionChanged = m_pCurSelection != result[0].movable->getParentSceneNode();
+		m_pCurSelection = result[0].movable->getParentSceneNode();
+	}
+
+	m_pSceneManager->destroyQuery(query);
+}
+
+void RenderEngine::StartGuiUpdate()
+{
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame(m_SDL_Window);
+	ImGui::NewFrame();
+}
+
+void RenderEngine::EndGuiUpdate()
+{
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	SDL_GL_SwapWindow(m_SDL_Window);
+	
+	
+}
+
+void RenderEngine::DisplayAllScripts()
+{
+	ImGui::Begin("Scripts");
+	
+	//std::string path = "D:\\MIPT\\Game-engines\\GameEnginesPractice\\GameEnginesPractice\\Scripts";
+	for (const auto& entry : std::filesystem::directory_iterator(m_pFileSystem->GetScriptsRoot()))
+	{
+		if (std::filesystem::is_regular_file(entry) && entry.path().extension() == ".lua")
+		{
+			std::string btnName = entry.path().filename().string();
+			if (ImGui::Button(btnName.c_str()))
+			{
+				std::string command = "start notepad++ " + entry.path().string();
+				std::system(command.c_str());
+			}
+		}
+	}
+	ImGui::End();
+}
+
+
+void RenderEngine::DisplayMenuBar()
+{
+	
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::MenuItem("Save", "CTRL+S")) {}
+			if (ImGui::MenuItem("Load", "")) {}
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+
+
+}
+
 
 void RenderEngine::RT_Init()
 {
 	if (!m_pRoot)
 	{
 		m_pRoot = OGRE_NEW Ogre::Root();
-		m_pD3D11Plugin = OGRE_NEW Ogre::D3D11Plugin();
+		//m_pD3D11Plugin = OGRE_NEW Ogre::D3D11Plugin();
 		m_pGL3PlusPlugin = OGRE_NEW Ogre::GL3PlusPlugin();
 
-		m_pRoot->installPlugin(m_pD3D11Plugin);
+		//m_pRoot->installPlugin(m_pD3D11Plugin);
 		m_pRoot->installPlugin(m_pGL3PlusPlugin);
 
 		if (!SetOgreConfig())
@@ -116,6 +213,8 @@ void RenderEngine::RT_Init()
 		params.insert(std::make_pair("gamma", "true"));
 		params.insert(std::make_pair("FSAA", "false"));
 		params.insert(std::make_pair("vsync", "false"));
+
+		
 
 		SDL_SysWMinfo info;
 		SDL_VERSION(&info.version);
@@ -149,18 +248,23 @@ void RenderEngine::RT_InitSDL()
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-	m_SDL_Window = SDL_CreateWindow("SDL Ogre Engine ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+	m_SDL_Window = SDL_CreateWindow("Dolor Engine ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
 
 	m_GL_Context = SDL_GL_CreateContext(m_SDL_Window);
 	SDL_GL_MakeCurrent(m_SDL_Window, m_GL_Context);
 	SDL_GL_SetSwapInterval(1);
 
 	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	m_pImGuiContext  = ImGui::CreateContext();
+	ImGui::SetCurrentContext(m_pImGuiContext);
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
+
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	io.WantCaptureKeyboard = true;
+	Ogre::LogManager::getSingleton().logMessage(std::to_string(io.WantCaptureKeyboard));
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplSDL2_InitForOpenGL(m_SDL_Window, m_GL_Context);
@@ -170,9 +274,10 @@ void RenderEngine::RT_InitSDL()
 void RenderEngine::RT_SDLClenup()
 {
 	// Cleanup
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui_ImplOpenGL3_Shutdown();
+	
 
 	SDL_GL_DeleteContext(m_GL_Context);
 	SDL_DestroyWindow(m_SDL_Window);

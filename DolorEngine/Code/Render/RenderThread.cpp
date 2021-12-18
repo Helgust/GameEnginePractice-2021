@@ -322,7 +322,7 @@ void RenderThread::WaitForMainThreadSignal()
 
 	while (!m_nFlush && !m_pRenderEngine->GetQuit())
 	{
-		int i = 0;
+		
 	}
 }
 

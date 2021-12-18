@@ -39,7 +39,7 @@ Entity.OnUpdate = function(dt)
         deltaMoveVelocity = deltaMoveVelocity + Entity.Parameters.move_speed;
     end
     if (inputHandler:isCommandActive(3)) then
-        deltaMoveVelocity = deltaMoveVelocity + Entity.Parameters.move_speed;
+        deltaMoveVelocity = deltaMoveVelocity - Entity.Parameters.move_speed;
     end
     
     deltaMoveVelocity = deltaMoveVelocity * dt;

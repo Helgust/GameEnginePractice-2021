@@ -30,6 +30,7 @@ public:
 	Ogre::Vector2 DeltaMousePos() const;
 	Ogre::Vector2 DeltaDownMousePos() const;
 	float GetMouseSensitivity() const { return m_pMouseSensitivity; }
+	bool GetLMouseStatus() const { return m_bLMouseButtonDown; };
 
 	void SetWinHandle(HWND window);
 
