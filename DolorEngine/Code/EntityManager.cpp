@@ -46,6 +46,7 @@ void EntityManager::CreateEntity(const EntityInfo &fromSave)
 
 	ScriptNode* pScriptNode = m_pScriptSystem->CreateScriptNode(fromSave.scriptName, newEntity);
 	pScriptNode->SetPosition(fromSave.position);
+	pScriptNode->SetNewOrientation(fromSave.rotation);
 
 	Ogre::String strMeshName = fromSave.meshName;
 	RenderNode* pRenderNode = new RenderNode(nIndex, strMeshName);

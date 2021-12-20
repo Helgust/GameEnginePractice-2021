@@ -13,7 +13,7 @@ Editor::Editor()
 	m_pWindowManager = new WindowManager(m_pRenderEngine, m_pEntityManager,m_pFileSystem, m_pLoadingSystem);
 	m_Timer.Start();
 
-	m_pLoadingSystem->LoadFromXML("NewinitialScene.xml");
+	m_pLoadingSystem->LoadFromXML("InitialScene.xml");
 
 	m_pFileSystem->CreateInitMapOfFiles();
 }

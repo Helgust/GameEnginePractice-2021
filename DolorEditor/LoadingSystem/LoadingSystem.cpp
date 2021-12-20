@@ -32,6 +32,7 @@ void LoadingSystem::LoadFromXML(const std::string fileName)
 			currentCharacter.meshName = e->Attribute("meshName");
 			currentCharacter.scriptName = e->Attribute("scriptName");
 			currentCharacter.position = ParsePosition(e->Attribute("position"));
+			currentCharacter.rotation = ParseRotation(e->Attribute("rotation"));
 
 			m_pEntityManager->CreateEntity(currentCharacter);
 		}
@@ -60,7 +61,7 @@ void LoadingSystem::LoadFromXML(const std::string fileName)
 
 void LoadingSystem::SaveToXML(const std::string fileName)
 {
-	const auto pathName = m_strSavesRootPath + "New"+fileName;
+	const auto pathName = m_strSavesRootPath +fileName;
 	TiXmlDocument doc(pathName.c_str());
 	TiXmlElement* root = new TiXmlElement("scene");
 	doc.LinkEndChild(root);
@@ -75,7 +76,12 @@ void LoadingSystem::SaveToXML(const std::string fileName)
 		e->SetAttribute("name", entity.second.pRenderNode->GetObjName().c_str());
 		e->SetAttribute("scriptName", entity.second.scriptName.c_str());
 		e->SetAttribute("meshName", entity.second.pRenderNode->GetMeshName().c_str());
-		e->SetAttribute("position", Ogre::StringConverter::toString(entity.second.pRenderNode->GetPosition()).c_str());
+		Ogre::Vector3 vPos = entity.second.pRenderNode->GetPosition();
+		std::string strPos = std::to_string(vPos.x) + "," + std::to_string(vPos.y) + "," + std::to_string(vPos.z);
+		e->SetAttribute("position", strPos.c_str());
+		Ogre::Quaternion vQ = entity.second.pRenderNode->GetOrientation();
+		std::string strQ = std::to_string(vQ.w) + "," + std::to_string(vQ.x) + "," + std::to_string(vQ.y)+"," + std::to_string(vQ.z);
+		e->SetAttribute("rotation", strQ.c_str());
 	}
 	
 	doc.SaveFile();
@@ -101,28 +107,41 @@ int LoadingSystem::ExportToEngine()
 			currentCharacter.meshName = e->Attribute("meshName");
 			currentCharacter.scriptName = e->Attribute("scriptName");
 			currentCharacter.position = ParsePosition(e->Attribute("position"));
+			currentCharacter.rotation = ParseRotation(e->Attribute("rotation"));
 
 			tempVec.push_back(currentCharacter);
 		}
 
-		std::ofstream wf(pathName, std::ios::out | std::ios::binary);
-		if (!wf) {
-			Ogre::LogManager::getSingleton().logMessage("Cannot open file!");
+		std::ofstream outfile;
+		outfile.open(pathName, std::ios::binary | std::ios::out);
+		if (!outfile) {
+			//Ogre::LogManager::getSingleton().logMessage("Cannot open file!");
 			return 1;
 		}
 
 		int count = tempVec.size();
-		wf.write((char*)&count, sizeof(int));
+		outfile.write((char*)&count, sizeof(int)); // sizeof can take a type
 		for (auto x : tempVec)
 		{
-			wf.write((char*)&x, sizeof(EntityInfo));
+			count = x.objName.size();
+			outfile.write((char*)&count, sizeof(int));
+			outfile.write(x.objName.c_str(), count);
+			count = x.meshName.size();
+			outfile.write((char*)&count, sizeof(int));
+			outfile.write(x.meshName.c_str(), count);
+			count = x.scriptName.size();
+			outfile.write((char*)&count, sizeof(int));
+			outfile.write(x.scriptName.c_str(), count);
+			outfile.write((char*)&x.position, sizeof(Ogre::Vector3));
+			outfile.write((char*)&x.rotation, sizeof(Ogre::Quaternion));
 		}
-		wf.close();
-		if (!wf.good()) 
+		outfile.close();
+		if (!outfile.good())
 		{
-			Ogre::LogManager::getSingleton().logMessage("Error occurred at writing time!");
+			//Ogre::LogManager::getSingleton().logMessage("Error occurred at writing time!");
 			return 1;
 		}
+		return 0;
 	}
 }
 
@@ -151,3 +170,29 @@ Ogre::Vector3 LoadingSystem::ParsePosition(const char* strPosition)
 
 	return vPosition;
 }
+
+Ogre::Quaternion LoadingSystem::ParseRotation(const char* strRotation)
+{
+	std::regex regex("[+-]?([0-9]*[.])?[0-9]+");
+	std::cmatch match;
+
+	Ogre::Quaternion vQuaternion;
+
+	std::regex_search(strRotation, match, regex);
+	vQuaternion.w = std::stof(match[0]);
+
+	strRotation = match.suffix().first;
+	std::regex_search(strRotation, match, regex);
+	vQuaternion.x = std::stof(match[0]);
+
+	strRotation = match.suffix().first;
+	std::regex_search(strRotation, match, regex);
+	vQuaternion.y = std::stof(match[0]);
+
+	strRotation = match.suffix().first;
+	std::regex_search(strRotation, match, regex);
+	vQuaternion.z = std::stof(match[0]);
+
+	return vQuaternion;
+}
+

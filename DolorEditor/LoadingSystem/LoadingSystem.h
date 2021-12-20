@@ -22,5 +22,6 @@ private:
 	std::string m_strLevelsRootPath;
 	std::string m_strCurSaveFile;
 	Ogre::Vector3 ParsePosition(const char* strPosition);
+	Ogre::Quaternion ParseRotation(const char* strRotation);
 };
 

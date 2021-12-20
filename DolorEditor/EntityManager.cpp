@@ -53,6 +53,7 @@ void EntityManager::CreateEntity(const EntityInfo &fromSave)
 	RenderNode* pRenderNode = new RenderNode(nIndex, strMeshName, strObjName);
 
 	pRenderNode->SetPosition(fromSave.position);
+	pRenderNode->SetOrientation(fromSave.rotation);
 
 	m_pRenderEngine->GetRT()->RC_CreateSceneNode(pRenderNode);
 

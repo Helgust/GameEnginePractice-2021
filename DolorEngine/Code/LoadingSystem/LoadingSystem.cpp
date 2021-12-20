@@ -38,27 +38,61 @@ int LoadingSystem::LoadFromBin(const std::string fileName)
 {
 	const auto pathName = m_strLevelsRootPath + fileName;
 	std::vector<EntityInfo> entityVector;
-	std::ifstream rf( pathName, std::ios::out | std::ios::binary);
-	if (!rf) 
+	std::ifstream infile;
+	infile.open( pathName, std::ios::binary | std::ios::in);
+	if (!infile)
 	{
 		//cout << "Cannot open file!" << endl;
 		return 1;
 	}
-	int n = 0;
-	rf.read((char*)n, sizeof(int));
-	//for (int i = 0; i < n; i++)
-	//{
-	//	rf.read((char*)entityVector.data(), sizeof(EntityInfo));
-	//}
-	rf.close();
-	//if (!rf.good()) {
-	//	//cout << "Error occurred at reading time!" << endl;
-	//	return 1;
-	//}
-	//for (auto x : entityVector)
-	//{
-	//	m_pEntityManager->CreateEntity(x);
-	//}
+	int n;
+	infile.read((char*)&n, sizeof(int));
+	std::cout << n;
+	for (int i = 0; i < n; i++)
+	{
+		EntityInfo tempEI;
+		int tempSize;
+		std::string tempStr;
+		infile.read((char*)&tempSize, sizeof(int));
+		char* temp = new char[tempSize + 1];
+		infile.read(temp, tempSize);
+		temp[tempSize] = '\0';
+		tempEI.objName = temp;
+		delete[] temp;
+
+		infile.read((char*)&tempSize, sizeof(int));
+		temp = new char[tempSize + 1];
+		infile.read(temp, tempSize);
+		temp[tempSize] = '\0';
+		tempEI.meshName = temp;
+		delete[] temp;
+
+		infile.read((char*)&tempSize, sizeof(int));
+		temp = new char[tempSize + 1];
+		infile.read(temp, tempSize);
+		temp[tempSize] = '\0';
+		tempEI.scriptName = temp;
+		delete[] temp;
+		
+		Ogre::Vector3 tempPos;
+		infile.read((char*)&tempPos, sizeof(Ogre::Vector3));
+		tempEI.position = tempPos;
+		Ogre::Quaternion tempQ;
+		infile.read((char*)&tempQ, sizeof(Ogre::Quaternion));
+		tempEI.rotation = tempQ;
+
+		entityVector.push_back(tempEI);
+	}
+	infile.close();
+	
+	if (!infile.good()) {
+		//cout << "Error occurred at reading time!" << endl;
+		return 1;
+	}
+	for (auto x : entityVector)
+	{
+		m_pEntityManager->CreateEntity(x);
+	}
 	return 0;
 }
 
