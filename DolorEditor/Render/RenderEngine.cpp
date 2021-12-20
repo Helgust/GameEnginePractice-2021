@@ -1,8 +1,9 @@
 #include "RenderEngine.h"
 
-#include "../ProjectDefines.h"
-
-RenderEngine::RenderEngine(ResourceManager* pResourceManager, InputHandler* pInputManager,FileSystem* pFileSystem) :
+RenderEngine::RenderEngine(
+	ResourceManager* pResourceManager, 
+	InputHandler* pInputManager, 
+	FileSystem* pFileSystem) :
 	m_pRoot(nullptr),
 	m_pRenderWindow(nullptr),
 	m_pSceneManager(nullptr),
@@ -14,6 +15,7 @@ RenderEngine::RenderEngine(ResourceManager* pResourceManager, InputHandler* pInp
 	m_pResourceManager(pResourceManager),
 	m_pInputManager(pInputManager),
 	m_pFileSystem(pFileSystem)
+
 {
 	m_pRT = new RenderThread(this);
 
@@ -92,34 +94,39 @@ void RenderEngine::Update()
 			ImGui_ImplSDL2_ProcessEvent(&event);
 		}
 	}
+
+	if (m_pInputManager->GetLMouseStatus())
+	{
+		RaycastToMouse();
+	}
+		
 	StartGuiUpdate();
 
-	/*DisplayMenuBar();
-	DisplayAllScripts();*/
-	///DisplaySelectionParameters();
-	//DisplayFreezeBtn();
+	DisplayMenuBar();
+	DisplayAllScripts();
+	DisplaySelectionParameters();
 
 	EndGuiUpdate();
 
 	m_pRenderWindow->windowMovedOrResized();
 }
 
-//void RenderEngine::RaycastToMouse()
-//{
-//	Ogre::Ray ray = m_pCamera->getCameraToViewportRay(float(m_pInputManager->MousePos().x) / m_pRenderWindow->getWidth(), float(m_pInputManager->MousePos().y) / m_pRenderWindow->getHeight());
-//	Ogre::RaySceneQuery* query = m_pSceneManager->createRayQuery(ray);
-//	query->setSortByDistance(true);
-//
-//	bool mMovableFound = false;
-//	Ogre::RaySceneQueryResult& result = query->execute();
-//	if (!result.empty())
-//	{
-//		m_bSelectionChanged = m_pCurSelection != result[0].movable->getParentSceneNode();
-//		m_pCurSelection = result[0].movable->getParentSceneNode();
-//	}
-//
-//	m_pSceneManager->destroyQuery(query);
-//}
+void RenderEngine::RaycastToMouse()
+{
+	Ogre::Ray ray = m_pCamera->getCameraToViewportRay(float(m_pInputManager->GetMousePos().x) / m_pRenderWindow->getWidth(), float(m_pInputManager->GetMousePos().y) / m_pRenderWindow->getHeight());
+	Ogre::RaySceneQuery* query = m_pSceneManager->createRayQuery(ray);
+	query->setSortByDistance(true);
+
+	bool mMovableFound = false;
+	Ogre::RaySceneQueryResult& result = query->execute();
+	if (!result.empty())
+	{
+		m_bSelectionChanged = m_pCurSelection != result[0].movable->getParentSceneNode();
+		m_pCurSelection = result[0].movable->getParentSceneNode();
+	}
+
+	m_pSceneManager->destroyQuery(query);
+}
 
 void RenderEngine::StartGuiUpdate()
 {
@@ -132,16 +139,13 @@ void RenderEngine::EndGuiUpdate()
 {
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	SDL_GL_SwapWindow(m_SDL_Window);
-	
-	
+	SDL_GL_SwapWindow(m_SDL_Window);	
 }
 
 void RenderEngine::DisplayAllScripts()
 {
 	ImGui::Begin("Scripts");
 	
-	//std::string path = "D:\\MIPT\\Game-engines\\GameEnginesPractice\\GameEnginesPractice\\Scripts";
 	for (const auto& entry : std::filesystem::directory_iterator(m_pFileSystem->GetScriptsRoot()))
 	{
 		if (std::filesystem::is_regular_file(entry) && entry.path().extension() == ".lua")
@@ -149,12 +153,74 @@ void RenderEngine::DisplayAllScripts()
 			std::string btnName = entry.path().filename().string();
 			if (ImGui::Button(btnName.c_str()))
 			{
-				std::string command = "start notepad++ " + entry.path().string();
+				std::string command = "start " + entry.path().string();
 				std::system(command.c_str());
 			}
 		}
 	}
 	ImGui::End();
+}
+
+void RenderEngine::DisplaySelectionParameters()
+{
+	if (m_pCurSelection)
+	{
+		ImGui::Begin("Parameters");
+		ImGui::Text(m_pCurSelection->getName().c_str());
+
+		static float posVec[3] = { 0.f, 0.f, 0.f };
+		posVec[0] = float(m_pCurSelection->getPosition().x);
+		posVec[1] = float(m_pCurSelection->getPosition().y);
+		posVec[2] = float(m_pCurSelection->getPosition().z);
+		ImGui::InputFloat3("Position", posVec);
+
+		static int rotVec[3] = { 0, 0, 0 };
+		rotVec[0] = int(m_pCurSelection->getOrientation().getPitch().valueDegrees());
+		rotVec[1] = int(m_pCurSelection->getOrientation().getYaw().valueDegrees());
+		rotVec[2] = int(m_pCurSelection->getOrientation().getRoll().valueDegrees());
+		ImGui::InputInt3("Rotation", rotVec);
+		ImGui::End();
+
+		m_pCurSelection->setPosition(posVec[0], posVec[1], posVec[2]);
+
+		Ogre::Quaternion q = m_pCurSelection->getOrientation();
+		int clampedX = std::clamp(rotVec[0], -180, 180);
+		if (clampedX != int(m_pCurSelection->getOrientation().getPitch().valueDegrees()))
+		{
+			Ogre::Radian radX = Ogre::Radian(Ogre::Degree(clampedX));
+			Ogre::Radian offsetX = radX - m_pCurSelection->getOrientation().getPitch();
+			q.FromAngleAxis(offsetX, Ogre::Vector3::UNIT_X);
+			q = q * m_pCurSelection->getOrientation();
+			m_pCurSelection->setOrientation(q);
+			return;
+		}
+
+		int clampedY = std::clamp(rotVec[1], -180, 180);
+		if (clampedY != int(m_pCurSelection->getOrientation().getYaw().valueDegrees()))
+		{
+			Ogre::Radian radY = Ogre::Radian(Ogre::Degree(clampedY));
+			Ogre::Radian offsetY = radY - m_pCurSelection->getOrientation().getYaw();
+			q.FromAngleAxis(offsetY, Ogre::Vector3::UNIT_Y);
+			q = q * m_pCurSelection->getOrientation();
+			m_pCurSelection->setOrientation(q);
+			return;
+		}
+
+		int clampedZ = std::clamp(rotVec[2], -180, 180);
+		if (clampedZ != int(m_pCurSelection->getOrientation().getRoll().valueDegrees()))
+		{
+			Ogre::Radian radZ = Ogre::Radian(Ogre::Degree(clampedZ));
+			Ogre::Radian offsetZ = radZ - m_pCurSelection->getOrientation().getRoll();
+			q.FromAngleAxis(offsetZ, Ogre::Vector3::UNIT_Z);
+			q = q * m_pCurSelection->getOrientation();
+			m_pCurSelection->setOrientation(q);
+			return;
+		}
+	}
+	else
+	{
+
+	}
 }
 
 
@@ -167,6 +233,7 @@ void RenderEngine::DisplayMenuBar()
 		{
 			if (ImGui::MenuItem("Save", "CTRL+S")) {}
 			if (ImGui::MenuItem("Load", "")) {}
+			if (ImGui::MenuItem("Export To Engine", "")) {}
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
@@ -231,7 +298,6 @@ void RenderEngine::RT_InitSDL()
 	SDL_Init(SDL_INIT_VIDEO);
 
 	// GL 3.0 + GLSL 130
-	const char* glsl_version = "#version 130";
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -246,10 +312,10 @@ void RenderEngine::RT_InitSDL()
 
 	m_GL_Context = SDL_GL_CreateContext(m_SDL_Window);
 	SDL_GL_MakeCurrent(m_SDL_Window, m_GL_Context);
-	SDL_GL_SetSwapInterval(1);
+	SDL_GL_SetSwapInterval(0);
 
 	IMGUI_CHECKVERSION();
-	m_pImGuiContext  = ImGui::CreateContext();
+	m_pImGuiContext = ImGui::CreateContext();
 	ImGui::SetCurrentContext(m_pImGuiContext);
 
 	// Setup Dear ImGui style
@@ -262,7 +328,51 @@ void RenderEngine::RT_InitSDL()
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplSDL2_InitForOpenGL(m_SDL_Window, m_GL_Context);
-	bool f = ImGui_ImplOpenGL3_Init(glsl_version);
+	bool f = ImGui_ImplOpenGL3_Init(SDL_GL_VERSION);
+}
+
+void RenderEngine::RT_MoveFB(float time, bool dir)
+{
+	if (dir) //positive dir
+	{
+		m_pCamera->setPosition(m_pCamera->getPosition() + m_nCameraSpeed*m_pCamera->getDirection() * time);
+	}
+	else
+	{
+		m_pCamera->setPosition(m_pCamera->getPosition() - m_nCameraSpeed*m_pCamera->getDirection() * time);
+	}
+}
+	
+
+void RenderEngine::RT_MoveLR(float time, bool dir)
+{
+	if(dir)
+	{
+		m_pCamera->setPosition(m_pCamera->getPosition() - m_nCameraSpeed*m_pCamera->getRight() * time);
+	}
+	else
+	{
+		m_pCamera->setPosition(m_pCamera->getPosition() + m_nCameraSpeed*m_pCamera->getRight() * time);
+	}
+	
+}
+
+void RenderEngine::RT_MoveUD(float time, bool dir)
+{
+	if (dir)
+	{
+		m_pCamera->setPosition(m_pCamera->getPosition() + m_nCameraSpeed*m_pCamera->getUp() * time);
+	}
+	else
+	{
+		m_pCamera->setPosition(m_pCamera->getPosition() - m_nCameraSpeed*m_pCamera->getUp() * time);
+	}
+}
+
+void RenderEngine::RT_SetRotation(float diffX, float diffY)
+{
+	m_pCamera->rotate(Ogre::Quaternion(Ogre::Radian(diffY), m_pCamera->getRight()));
+	m_pCamera->yaw(Ogre::Radian(diffX));
 }
 
 void RenderEngine::RT_SDLClenup()
@@ -327,12 +437,17 @@ void RenderEngine::RT_CreateSceneNode(RenderNode* pRenderNode)
 		Ogre::SCENE_DYNAMIC);
 	Ogre::SceneNode* pSceneNode = m_pSceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC)->
 		createChildSceneNode(Ogre::SCENE_DYNAMIC);
+	
 	pSceneNode->attachObject(item);
+	pSceneNode->setName(pRenderNode->GetObjName());
 	pSceneNode->scale(0.1f, 0.1f, 0.1f); // TODO: move out to ecs
 	
 	pRenderNode->SetSceneNode(pSceneNode);
 
 	m_RenderNodes.push_back(pRenderNode);
+
+	/*Ogre::LogManager::getSingleton().logMessage("RN_" + std::to_string(pRenderNode->GetId()));
+	Ogre::LogManager::getSingleton().logMessage("SN_" + std::to_string(pSceneNode->getId()));*/
 }
 
 void RenderEngine::ImportV1Mesh(Ogre::String strMeshName)

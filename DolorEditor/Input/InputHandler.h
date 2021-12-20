@@ -26,20 +26,22 @@ public:
 	const std::bitset<eIC_Max>& GetInputState() const;
 	bool IsCommandActive(EInputCommand inputCommand) const;
 
-	Ogre::Vector2 MousePos() const;
-	Ogre::Vector2 DeltaMousePos() const;
-	Ogre::Vector2 DeltaDownMousePos() const;
 	float GetMouseSensitivity() const { return m_pMouseSensitivity; }
-	bool GetLMouseStatus() const { return m_bLMouseButtonDown; };
 
-	void SetWinHandle(HWND window);
+	bool GetLMouseStatus() const { return m_bLMouseButtonDown; };
+	bool GetRMouseStatus() const { return m_bRMouseButtonDown; };
+
+	Ogre::Vector2 GetMousePos() { return m_pCurMousePos; };
+
+	float GetMouseDiffX() { return mouseDiffX; }
+	float GetMouseDiffY() { return mouseDiffY; }
 
 private:
 	void LoadConfiguration();
 
 	bool IsKeyDown(int vk_key);
 
-	
+
 	void MapInputEvent(int nSymbol, size_t nCommand);
 	void MapSymbol(std::string strSymbol, int nSymbol);
 	void MapCommandSymbol(std::string strCommand, size_t nCommand, std::string strDefaultSymbol);
@@ -49,6 +51,11 @@ private:
 	void ReadMouseInput();
 
 	bool m_bIsQuit;
+
+	void FillSymbolMap();
+	void FillCommandMap();
+	void FillCommandSymbolMap();
+
 	std::string m_strMapFilePath;
 
 	typedef std::unordered_map<std::string, size_t> TCommandMap;
@@ -66,9 +73,10 @@ private:
 	bool m_bLMouseButtonDown;
 	bool m_bRMouseButtonDown;
 
-	POINT m_pMousePoint;
+	float mouseDiffX;
+	float mouseDiffY;
+
 	Ogre::Vector2 m_pCurMousePos;
 	Ogre::Vector2 m_pPrevMousePos;
 	float m_pMouseSensitivity;
 };
-

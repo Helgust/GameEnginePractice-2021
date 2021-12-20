@@ -35,7 +35,7 @@ class RenderEngine
 	friend class RenderThread;
 
 public:
-	RenderEngine(ResourceManager* pResourceManager, InputHandler* pInputManager, FileSystem* m_pFileSystem);
+	RenderEngine(ResourceManager* pResourceManager, InputHandler* pInputManager, FileSystem* pFileSystem);
 	~RenderEngine();
 	RenderEngine(const RenderEngine&) = delete;
 	RenderEngine& operator=(const RenderEngine&) = delete;
@@ -44,6 +44,9 @@ public:
 
 	bool GetQuit() { return m_bQuit; }
 	void SetQuit(bool bQuit) { m_bQuit = bQuit; }
+	Ogre::SceneManager* GetSceneManager() { return m_pSceneManager; };
+	Ogre::Camera* GetMainCamera() { return m_pCamera; };
+	SDL_Window* GetWindow() { return m_SDL_Window; };
 
 	RenderThread* GetRT() const { return m_pRT; }
 
@@ -61,6 +64,10 @@ private:
 	void RT_SetupDefaultLight();
 	void RT_CreateSceneNode(RenderNode* pRenderNode);
 	void RT_InitSDL();
+	void RT_MoveLR(float time, bool dir);
+	void RT_MoveFB(float time, bool dir);
+	void RT_MoveUD(float time, bool dir);
+	void RT_SetRotation(float diffX,float diffY);
 
 	void RaycastToMouse();
 
@@ -73,8 +80,8 @@ private:
 	void ImportV1Mesh(Ogre::String strMeshName);
 
 
-	Ogre::SceneNode* m_pCurSNSelection;
-	RenderNode* m_pCurRNSelection;
+	Ogre::SceneNode* m_pCurSelection;
+	//RenderNode* m_pCurSNSelection;
 	bool m_bSelectionChanged;
 	bool m_bIsFreeze;
 
@@ -95,6 +102,8 @@ private:
 	SDL_Window* m_SDL_Window;
 	SDL_GLContext m_GL_Context;
 	ImGuiContext* m_pImGuiContext;
+
+	int m_nCameraSpeed = 50;
 
 	bool m_bQuit;
 };

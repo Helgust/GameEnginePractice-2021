@@ -1,6 +1,6 @@
 Entity = {
     Properties = {
-        Controllable = 0,
+        Controllable = 1,
         HasPhysics = 0,
 		IsStatic = 0,
     },

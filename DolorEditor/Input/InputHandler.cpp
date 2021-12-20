@@ -12,13 +12,15 @@ InputHandler::InputHandler(const std::string& strResourceRoot)
 	m_bLMouseButtonDown = false;
 	m_bRMouseButtonDown = false;
 	m_bIsQuit = false;
-	m_strMapFilePath = strResourceRoot + "actionmapGame.ini";
+	m_strMapFilePath = strResourceRoot + "actionmap.ini";
 	std::replace(m_strMapFilePath.begin(), m_strMapFilePath.end(), '\\', '/');
 
 	MapSymbol("a", 'A');
 	MapSymbol("d", 'D');
 	MapSymbol("w", 'W');
 	MapSymbol("s", 'S');
+	MapSymbol("q", 'Q');
+	MapSymbol("e", 'E');
 
 	MapSymbol("left", VK_LEFT);
 	MapSymbol("right", VK_RIGHT);
@@ -28,10 +30,12 @@ InputHandler::InputHandler(const std::string& strResourceRoot)
 	MapSymbol("rmb", VK_RBUTTON);
 
 
-	MapCommandSymbol("TurnLeft", eIC_TurnLeft, "a");
-	MapCommandSymbol("TurnRight", eIC_TurnRight, "d");
+	MapCommandSymbol("MoveLeft", eIC_MoveLeft, "a");
+	MapCommandSymbol("MoveRight", eIC_MoveRight, "d");
 	MapCommandSymbol("MoveForward", eIC_MoveForward, "w");
 	MapCommandSymbol("MoveBack", eIC_MoveBack, "s");
+	MapCommandSymbol("MoveUp", eIC_MoveUp, "q");
+	MapCommandSymbol("MoveDown", eIC_MoveDown, "e");
 
 
 
@@ -127,23 +131,41 @@ void InputHandler::ReadMouseInput()
 		switch (event.type)
 		{
 
-
 		case SDL_MOUSEBUTTONDOWN:
-			m_bLMouseButtonDown = event.button.button == SDL_BUTTON_LEFT;
+			if (event.button.button == SDL_BUTTON_LEFT)
+			{
+				m_bLMouseButtonDown = true;
+			}
+			if (event.button.button == SDL_BUTTON_RIGHT)
+			{
+				m_bRMouseButtonDown = true;
+			}
 			break;
 		case SDL_MOUSEBUTTONUP:
 			if (event.button.button == SDL_BUTTON_LEFT)
 			{
 				m_bLMouseButtonDown = false;
 			}
+			if (event.button.button == SDL_BUTTON_RIGHT)
+			{
+				m_bRMouseButtonDown = false;
+			}
 			break;
+
+		case SDL_MOUSEMOTION:
+			mouseDiffX = float(event.motion.xrel);
+			mouseDiffY = float(event.motion.yrel);
+			break;
+
+
 		case SDL_QUIT:
 			m_bIsQuit = true;
 			break;
 		default:
 			break;
 		}
-		Ogre::LogManager::getSingleton().logMessage(std::to_string(m_bLMouseButtonDown));
+		/*Ogre::LogManager::getSingleton().logMessage("L_" + std::to_string(m_bLMouseButtonDown));
+		Ogre::LogManager::getSingleton().logMessage("R_" + std::to_string(m_bRMouseButtonDown));*/
 	}
 }
 
@@ -154,13 +176,5 @@ const std::bitset<eIC_Max>& InputHandler::GetInputState() const
 
 bool InputHandler::IsCommandActive(EInputCommand inputCommand) const
 {
-	//Ogre::LogManager::getSingleton().logMessage(std::to_string(inputCommand) + "_" + std::to_string(m_InputState.test(inputCommand)));
 	return m_InputState.test(inputCommand);
 }
-
-Ogre::Vector2 InputHandler::MousePos() const
-{
-	return m_pCurMousePos;
-}
-
-
