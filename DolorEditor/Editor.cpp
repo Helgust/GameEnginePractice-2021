@@ -9,12 +9,11 @@ Editor::Editor()
 	m_pRenderEngine = new RenderEngine(m_pResourceManager, m_pInputHandler, m_pFileSystem);
 	m_pScriptSystem = new ScriptSystem(m_pInputHandler, m_pFileSystem->GetScriptsRoot());
 	m_pEntityManager = new EntityManager(m_pRenderEngine, m_pScriptSystem);
-	m_pLoadingSystem = new LoadingSystem(m_pEntityManager, m_pFileSystem->GetSavesRoot());
-
+	m_pLoadingSystem = new LoadingSystem(m_pEntityManager, m_pFileSystem->GetSavesRoot(), m_pFileSystem->GetLevelsRoot());
+	m_pWindowManager = new WindowManager(m_pRenderEngine, m_pEntityManager,m_pFileSystem, m_pLoadingSystem);
 	m_Timer.Start();
 
-
-	m_pLoadingSystem->LoadFromXML("initialScene.xml");
+	m_pLoadingSystem->LoadFromXML("NewinitialScene.xml");
 
 	m_pFileSystem->CreateInitMapOfFiles();
 }
@@ -42,6 +41,11 @@ void Editor::Run()
 
 
 		//static bool isDone = false;
+		if (m_pWindowManager)
+		{
+			m_pWindowManager->Update();
+		}
+
 
 		if (m_pInputHandler)
 		{
@@ -102,7 +106,7 @@ void Editor::Run()
 
 		if (m_pInputHandler->GetQuit())
 		{
-			m_pRenderEngine->GetRT()->RC_SDLCleanup();
+			//m_pRenderEngine->GetRT()->RC_SDLCleanup();
 			break;
 		}
 		m_pRenderEngine->GetRT()->RC_EndFrame();

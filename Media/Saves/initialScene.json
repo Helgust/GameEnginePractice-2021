@@ -1,0 +1,102 @@
+[
+    {
+    	"name": "Player",
+    	"scriptName": "Camera.lua",
+        "meshName": "ogrehead.mesh",
+        "position": [
+            0.0,
+            0.0,
+            0.0
+        ],
+    },
+    {
+    	"name": "ogre_enemy",
+    	"scriptName": "Actor.lua",
+        "meshName": "ogrehead.mesh",
+        "position": [
+            25.0,
+            0.0,
+            0.0
+        ],
+    },
+    {
+    	"name": "ogre_enemy",
+    	"scriptName": "Actor.lua",
+        "meshName": "ogrehead.mesh",
+        "position": [
+            15.0,
+            0.0,
+            0.0
+        ],
+    },
+    {
+    	"name": "ogre_enemy",
+    	"scriptName": "Actor.lua",
+        "meshName": "ogrehead.mesh",
+        "position": [
+            15.0,
+            0.0,
+            20.0
+        ],
+    },
+    {
+    	"name": "ogre_enemy",
+    	"scriptName": "Actor.lua",
+        "meshName": "ogrehead.mesh",
+        "position": [
+            -25.0,
+            0.0,
+            0.0
+        ],
+    },
+    {
+    	"name": "ogre_enemy",
+    	"scriptName": "Actor.lua",
+        "meshName": "ogrehead.mesh",
+        "position": [
+            -15.0,
+            0.0,
+            0.0
+        ],
+    },
+    {
+    	"name": "ogre_enemy",
+    	"scriptName": "Actor.lua",
+        "meshName": "ogrehead.mesh",
+        "position": [
+            25.0,
+            10.0,
+            0.0
+        ],
+    },
+    {
+    	"name": "ogre_enemy",
+    	"scriptName": "Actor.lua",
+        "meshName": "ogrehead.mesh",
+        "position": [
+            25.0,
+            -15.0,
+            0.0
+        ],
+    },
+    {
+    	"name": "ogre_enemy",
+    	"scriptName": "Actor.lua",
+        "meshName": "ogrehead.mesh",
+        "position": [
+            25.0,
+            -15.0,
+            -10.0
+        ],
+    },
+    {
+    	"name": "ogre_enemy",
+    	"scriptName": "Actor.lua",
+        "meshName": "ogrehead.mesh",
+        "position": [
+            25.0,
+            -15.0,
+            10.0
+        ],
+    },
+]

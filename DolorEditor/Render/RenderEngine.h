@@ -47,11 +47,12 @@ public:
 	Ogre::SceneManager* GetSceneManager() { return m_pSceneManager; };
 	Ogre::Camera* GetMainCamera() { return m_pCamera; };
 	SDL_Window* GetWindow() { return m_SDL_Window; };
+	RenderNode* GetCurrentSelection() { return m_pCurSelection; };
 
 	RenderThread* GetRT() const { return m_pRT; }
 
 
-	void RT_SDLClenup();
+	//void RT_SDLClenup();
 
 
 private:
@@ -63,7 +64,7 @@ private:
 	void RT_LoadDefaultResources();
 	void RT_SetupDefaultLight();
 	void RT_CreateSceneNode(RenderNode* pRenderNode);
-	void RT_InitSDL();
+	//void RT_InitSDL();
 	void RT_MoveLR(float time, bool dir);
 	void RT_MoveFB(float time, bool dir);
 	void RT_MoveUD(float time, bool dir);
@@ -71,16 +72,17 @@ private:
 
 	void RaycastToMouse();
 
-	void StartGuiUpdate();
-	void EndGuiUpdate();
-	void DisplaySelectionParameters();
-	void DisplayAllScripts();
-	void DisplayMenuBar();
+	//void StartGuiUpdate();
+	//void EndGuiUpdate();
+	//void DisplaySelectionParameters();
+	//void DisplayAllScripts();
+	//void DisplayMenuBar();
 
 	void ImportV1Mesh(Ogre::String strMeshName);
 
 
-	Ogre::SceneNode* m_pCurSelection;
+	//Ogre::SceneNode* m_pCurSelection;
+	RenderNode* m_pCurSelection;
 	//RenderNode* m_pCurSNSelection;
 	bool m_bSelectionChanged;
 	bool m_bIsFreeze;

@@ -16,6 +16,10 @@ FileSystem::FileSystem()
 	m_strSavesRoot = m_strMediaRoot;
 	m_strSavesRoot.append("Saves");
 	m_strSavesRoot.push_back(cNativeSlash);
+
+	m_strLevelsRoot = m_strMediaRoot;
+	m_strLevelsRoot.append("Levels");
+	m_strLevelsRoot.push_back(cNativeSlash);
 }
 
 FileSystem::~FileSystem()
@@ -35,6 +39,11 @@ const std::string& FileSystem::GetScriptsRoot()
 const std::string& FileSystem::GetSavesRoot()
 {
 	return m_strSavesRoot;
+}
+
+const std::string& FileSystem::GetLevelsRoot()
+{
+	return m_strLevelsRoot;
 }
 
 void FileSystem::CreateInitMapOfFiles()

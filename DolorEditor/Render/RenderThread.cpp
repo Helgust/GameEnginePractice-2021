@@ -306,19 +306,19 @@ void RenderThread::RC_BeginFrame()
 
 }
 
-void RenderThread::RC_SDLCleanup()
-{
-	LOADINGCOMMAND_CRITICAL_SECTION;
-
-	if (IsRenderThread())
-	{
-		m_pRenderEngine->RT_SDLClenup();
-		return;
-	}
-
-	byte* p = AddCommand(eRC_SDLCleanup, 0);
-	AddRawData(p, 0);
-}
+//void RenderThread::RC_SDLCleanup()
+//{
+//	LOADINGCOMMAND_CRITICAL_SECTION;
+//
+//	if (IsRenderThread())
+//	{
+//		m_pRenderEngine->RT_SDLClenup();
+//		return;
+//	}
+//
+//	byte* p = AddCommand(eRC_SDLCleanup, 0);
+//	AddRawData(p, 0);
+//}
 
 void RenderThread::RC_MoveLR(float time,bool dir)
 {

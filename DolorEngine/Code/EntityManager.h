@@ -12,6 +12,7 @@ class ScriptSystem;
 
 struct EntityInfo
 {
+	std::string objName;
 	std::string meshName;
 	std::string scriptName;
 	Ogre::Vector3 position;

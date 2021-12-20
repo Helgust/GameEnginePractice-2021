@@ -4,7 +4,7 @@ EntityManager::EntityManager(RenderEngine* pRenderEngine, ScriptSystem* pScriptS
 	m_pRenderEngine(pRenderEngine),
 	m_pScriptSystem(pScriptSystem)
 {
-
+	m_sLevelName = "";
 }
 
 EntityManager::~EntityManager()
@@ -36,6 +36,12 @@ EntityManager::~EntityManager()
 //	m_entityQueue[nIndex] = entity;
 //}
 
+void EntityManager::ClearRenderNodes()
+{
+
+	m_sLevelName = "";
+	m_entityQueue.clear();
+}
 
 void EntityManager::CreateEntity(const EntityInfo &fromSave)
 {
@@ -43,8 +49,7 @@ void EntityManager::CreateEntity(const EntityInfo &fromSave)
 	uint32_t nIndex = GetNewIndex();
 
 	Ogre::String strMeshName = fromSave.meshName;
-	Ogre::String strObjName = fromSave.meshName;
-	strObjName = strObjName.append(std::to_string(nIndex));
+	Ogre::String strObjName = fromSave.objName;
 	RenderNode* pRenderNode = new RenderNode(nIndex, strMeshName, strObjName);
 
 	pRenderNode->SetPosition(fromSave.position);
@@ -57,6 +62,7 @@ void EntityManager::CreateEntity(const EntityInfo &fromSave)
 	entity.position = fromSave.position;
 	entity.rotation = fromSave.rotation;
 	entity.idx = nIndex;
+
 
 	m_entityQueue[nIndex] = entity;
 }
@@ -85,4 +91,14 @@ uint32_t EntityManager::GetNewIndex() const
 std::unordered_map<uint32_t, Entity> EntityManager::GetEntityQueue() const
 {
 	return m_entityQueue;
+}
+
+void EntityManager::SetNewScriptName(std::string newName, uint32_t id)
+{
+	m_entityQueue[id].scriptName = newName;
+}
+
+void EntityManager::SetNameOfLevel(std::string newName)
+{
+	m_sLevelName = newName;
 }

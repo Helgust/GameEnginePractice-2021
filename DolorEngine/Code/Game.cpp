@@ -14,7 +14,7 @@ Game::Game()
 	m_pRenderEngine = new RenderEngine(m_pResourceManager, m_pInputHandler, m_pFileSystem);
 	m_pScriptSystem = new ScriptSystem(m_pInputHandler, m_pFileSystem->GetScriptsRoot());
 	m_pEntityManager = new EntityManager(m_pRenderEngine, m_pScriptSystem, m_pEcs);
-	m_pLoadingSystem = new LoadingSystem(m_pEntityManager, m_pFileSystem->GetSavesRoot());
+	m_pLoadingSystem = new LoadingSystem(m_pEntityManager, m_pFileSystem->GetSavesRoot(), m_pFileSystem->GetLevelsRoot());
 
 	m_Timer.Start();
 
@@ -23,7 +23,8 @@ Game::Game()
 	m_pEcs->entity("scriptSystem")
 		.set(ScriptSystemPtr{ m_pScriptSystem });
 
-	m_pLoadingSystem->LoadFromXML("initialScene.xml");
+	//m_pLoadingSystem->LoadFromXML("initialScene.xml");
+	m_pLoadingSystem->LoadFromBin("level0.dlr");
 
 	register_ecs_mesh_systems(m_pEcs);
 	register_ecs_control_systems(m_pEcs);

@@ -3,10 +3,12 @@
 #include "OgreSceneManager.h"
 #include "tinyxml.h"
 #include <regex>
+#include<fstream>
 
-LoadingSystem::LoadingSystem(EntityManager* pEntityManager, const std::string& scriptsRoot) :
+LoadingSystem::LoadingSystem(EntityManager* pEntityManager, const std::string& savesRoot, const std::string& levelsRoot) :
 	m_pEntityManager(pEntityManager),
-	m_strSavesRootPath(scriptsRoot)
+	m_strSavesRootPath(savesRoot),
+	m_strLevelsRootPath(levelsRoot)
 {
 
 }
@@ -30,6 +32,34 @@ void LoadingSystem::LoadFromXML(const std::string fileName)
 			m_pEntityManager->CreateEntity(currentCharacter);
 		}
 	}
+}
+
+int LoadingSystem::LoadFromBin(const std::string fileName)
+{
+	const auto pathName = m_strLevelsRootPath + fileName;
+	std::vector<EntityInfo> entityVector;
+	std::ifstream rf( pathName, std::ios::out | std::ios::binary);
+	if (!rf) 
+	{
+		//cout << "Cannot open file!" << endl;
+		return 1;
+	}
+	int n = 0;
+	rf.read((char*)n, sizeof(int));
+	//for (int i = 0; i < n; i++)
+	//{
+	//	rf.read((char*)entityVector.data(), sizeof(EntityInfo));
+	//}
+	rf.close();
+	//if (!rf.good()) {
+	//	//cout << "Error occurred at reading time!" << endl;
+	//	return 1;
+	//}
+	//for (auto x : entityVector)
+	//{
+	//	m_pEntityManager->CreateEntity(x);
+	//}
+	return 0;
 }
 
 void LoadingSystem::SaveToXML(const std::string fileName)

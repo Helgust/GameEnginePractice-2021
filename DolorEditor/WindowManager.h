@@ -1,36 +1,29 @@
 #pragma once
 
 #include "Render/RenderEngine.h"
+#include "EntityManager.h"
 #include "OgreSceneNode.h"
 
-//#include "SDL.h"
-//#include "SDL_opengl.h"
-//
-//#include "imgui.h"
-//#include "backends/imgui_impl_sdl.h"
-//#include "backends/imgui_impl_opengl3.h"
-//
-//#ifdef _WINDOWS
-//#include "SDL_syswm.h"
-//#endif 
-
-class EditorWindow
+class WindowManager
 {
 public:
-	EditorWindow(RenderEngine* renderEngine);
-	~EditorWindow();
+	WindowManager(RenderEngine* pRenderEngine, EntityManager* pEntityManager, FileSystem* pFileSystem, LoadingSystem* pLoadingSystem);
+	~WindowManager();
 
 	void Update();
 	bool IsQuit() const { return m_bIsClosed; };
 	bool IsFrozen() const { return m_bIsFrozen; };
 
-	void SetSelection(Ogre::SceneNode* newSelection) { m_pCurrentSelection = newSelection; };
+	//void SetSelection(Ogre::SceneNode* newSelection) { m_pCurrentSelection = newSelection; };
 private:
 
 	bool m_bIsFrozen;
 	bool m_bIsClosed;
 
 	RenderEngine* m_pRenderEngine;
+	EntityManager* m_pEntityManager;
+	FileSystem* m_pFileSystem;
+	LoadingSystem* m_pLoadingSystem;
 
 	void ProcessSDLInput();
 
@@ -47,6 +40,6 @@ private:
 
 	SDL_Window* m_SDLWindow;
 	SDL_GLContext m_GLContext;
-	Ogre::SceneNode* m_pCurrentSelection;
+	RenderNode* m_pCurrentSelection;
 };
 

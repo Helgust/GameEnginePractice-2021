@@ -12,7 +12,7 @@ InputHandler::InputHandler(const std::string& strResourceRoot)
 	m_bLMouseButtonDown = false;
 	m_bRMouseButtonDown = false;
 	m_bIsQuit = false;
-	m_strMapFilePath = strResourceRoot + "actionmap.ini";
+	m_strMapFilePath = strResourceRoot + "actionmapEditor.ini";
 	std::replace(m_strMapFilePath.begin(), m_strMapFilePath.end(), '\\', '/');
 
 	MapSymbol("a", 'A');

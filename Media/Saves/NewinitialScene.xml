@@ -1,0 +1,12 @@
+<scene name="Initial Scene">
+    <character name="Player0" scriptName="Actor.lua" meshName="ogrehead.mesh" position="0 0 0" />
+    <character name="ogre_enemy1" scriptName="Actor.lua" meshName="ogrehead.mesh" position="25 0 0" />
+    <character name="ogre_enemy2" scriptName="Actor.lua" meshName="ogrehead.mesh" position="15 0 0" />
+    <character name="ogre_enemy3" scriptName="Actor.lua" meshName="ogrehead.mesh" position="15 0 20" />
+    <character name="ogre_enemy4" scriptName="Actor.lua" meshName="ogrehead.mesh" position="-25 0 0" />
+    <character name="ogre_enemy5" scriptName="Actor.lua" meshName="ogrehead.mesh" position="-15 0 0" />
+    <character name="ogre_enemy6" scriptName="Actor.lua" meshName="ogrehead.mesh" position="25 10 0" />
+    <character name="ogre_enemy7" scriptName="Actor.lua" meshName="ogrehead.mesh" position="25 -15 0" />
+    <character name="ogre_enemy8" scriptName="Actor.lua" meshName="ogrehead.mesh" position="25 -15 -10" />
+    <character name="ogre_enemy9" scriptName="Actor.lua" meshName="ogrehead.mesh" position="25 -15 10" />
+</scene>

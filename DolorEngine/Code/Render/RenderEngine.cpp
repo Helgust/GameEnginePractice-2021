@@ -141,7 +141,6 @@ void RenderEngine::DisplayAllScripts()
 {
 	ImGui::Begin("Scripts");
 	
-	//std::string path = "D:\\MIPT\\Game-engines\\GameEnginesPractice\\GameEnginesPractice\\Scripts";
 	for (const auto& entry : std::filesystem::directory_iterator(m_pFileSystem->GetScriptsRoot()))
 	{
 		if (std::filesystem::is_regular_file(entry) && entry.path().extension() == ".lua")
@@ -248,11 +247,9 @@ void RenderEngine::RT_InitSDL()
 	SDL_GL_MakeCurrent(m_SDL_Window, m_GL_Context);
 	SDL_GL_SetSwapInterval(1);
 
-	IMGUI_CHECKVERSION();
-	m_pImGuiContext  = ImGui::CreateContext();
+	m_pImGuiContext = ImGui::CreateContext();
 	ImGui::SetCurrentContext(m_pImGuiContext);
 
-	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -271,7 +268,6 @@ void RenderEngine::RT_SDLClenup()
 	ImGui::DestroyContext();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui_ImplOpenGL3_Shutdown();
-	
 
 	SDL_GL_DeleteContext(m_GL_Context);
 	SDL_DestroyWindow(m_SDL_Window);

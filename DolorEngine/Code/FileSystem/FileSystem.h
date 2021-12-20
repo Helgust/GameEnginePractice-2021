@@ -31,6 +31,7 @@ public:
 	const std::string& GetMediaRoot();
 	const std::string& GetScriptsRoot();
 	const std::string& GetSavesRoot();
+	const std::string& GetLevelsRoot();
 	void  CreateInitMapOfFiles();
 	void Update(EntityManager* entityManager);
 	std::map<std::filesystem::path, std::filesystem::file_time_type> m_mapFileReport;
@@ -39,6 +40,7 @@ private:
 	std::string m_strMediaRoot;
 	std::string m_strScriptsRoot;
 	std::string m_strSavesRoot;
+	std::string m_strLevelsRoot;
 	
 	Lock m_RWLock;
 };

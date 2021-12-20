@@ -7,6 +7,7 @@
 #include "Input/InputHandler.h"
 #include "ResourceManager.h"
 #include "EntityManager.h"
+#include "WindowManager.h"
 #include "GameTimer.h"
 #include "flecs.h"
 
@@ -32,5 +33,6 @@ private:
 	ScriptSystem* m_pScriptSystem;
 	EntityManager* m_pEntityManager;
 	LoadingSystem* m_pLoadingSystem;
+	WindowManager* m_pWindowManager;
 };
 

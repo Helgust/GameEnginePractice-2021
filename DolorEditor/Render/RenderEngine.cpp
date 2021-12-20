@@ -18,6 +18,8 @@ RenderEngine::RenderEngine(
 
 {
 	m_pRT = new RenderThread(this);
+	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+	m_SDL_Window = SDL_CreateWindow("Dolor Editor ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
 
 	m_pRT->RC_Init();
 	m_pRT->RC_SetupDefaultCamera();
@@ -100,19 +102,20 @@ void RenderEngine::Update()
 		RaycastToMouse();
 	}
 		
-	StartGuiUpdate();
+	/*StartGuiUpdate();
 
 	DisplayMenuBar();
 	DisplayAllScripts();
 	DisplaySelectionParameters();
 
-	EndGuiUpdate();
+	EndGuiUpdate();*/
 
 	m_pRenderWindow->windowMovedOrResized();
 }
 
 void RenderEngine::RaycastToMouse()
 {
+	Ogre::SceneNode* m_pTempSelection = nullptr;
 	Ogre::Ray ray = m_pCamera->getCameraToViewportRay(float(m_pInputManager->GetMousePos().x) / m_pRenderWindow->getWidth(), float(m_pInputManager->GetMousePos().y) / m_pRenderWindow->getHeight());
 	Ogre::RaySceneQuery* query = m_pSceneManager->createRayQuery(ray);
 	query->setSortByDistance(true);
@@ -121,126 +124,138 @@ void RenderEngine::RaycastToMouse()
 	Ogre::RaySceneQueryResult& result = query->execute();
 	if (!result.empty())
 	{
-		m_bSelectionChanged = m_pCurSelection != result[0].movable->getParentSceneNode();
-		m_pCurSelection = result[0].movable->getParentSceneNode();
+		m_bSelectionChanged = m_pTempSelection != result[0].movable->getParentSceneNode();
+		m_pTempSelection = result[0].movable->getParentSceneNode();
 	}
 
-	m_pSceneManager->destroyQuery(query);
-}
-
-void RenderEngine::StartGuiUpdate()
-{
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame(m_SDL_Window);
-	ImGui::NewFrame();
-}
-
-void RenderEngine::EndGuiUpdate()
-{
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	SDL_GL_SwapWindow(m_SDL_Window);	
-}
-
-void RenderEngine::DisplayAllScripts()
-{
-	ImGui::Begin("Scripts");
-	
-	for (const auto& entry : std::filesystem::directory_iterator(m_pFileSystem->GetScriptsRoot()))
+	if (m_pTempSelection)
 	{
-		if (std::filesystem::is_regular_file(entry) && entry.path().extension() == ".lua")
+		for (RenderNode* x : m_RenderNodes)
 		{
-			std::string btnName = entry.path().filename().string();
-			if (ImGui::Button(btnName.c_str()))
+			if (x->GetSceneNode() == m_pTempSelection)
 			{
-				std::string command = "start " + entry.path().string();
-				std::system(command.c_str());
+				m_pCurSelection = x;
+				break;
 			}
 		}
 	}
-	ImGui::End();
-}
-
-void RenderEngine::DisplaySelectionParameters()
-{
-	if (m_pCurSelection)
-	{
-		ImGui::Begin("Parameters");
-		ImGui::Text(m_pCurSelection->getName().c_str());
-
-		static float posVec[3] = { 0.f, 0.f, 0.f };
-		posVec[0] = float(m_pCurSelection->getPosition().x);
-		posVec[1] = float(m_pCurSelection->getPosition().y);
-		posVec[2] = float(m_pCurSelection->getPosition().z);
-		ImGui::InputFloat3("Position", posVec);
-
-		static int rotVec[3] = { 0, 0, 0 };
-		rotVec[0] = int(m_pCurSelection->getOrientation().getPitch().valueDegrees());
-		rotVec[1] = int(m_pCurSelection->getOrientation().getYaw().valueDegrees());
-		rotVec[2] = int(m_pCurSelection->getOrientation().getRoll().valueDegrees());
-		ImGui::InputInt3("Rotation", rotVec);
-		ImGui::End();
-
-		m_pCurSelection->setPosition(posVec[0], posVec[1], posVec[2]);
-
-		Ogre::Quaternion q = m_pCurSelection->getOrientation();
-		int clampedX = std::clamp(rotVec[0], -180, 180);
-		if (clampedX != int(m_pCurSelection->getOrientation().getPitch().valueDegrees()))
-		{
-			Ogre::Radian radX = Ogre::Radian(Ogre::Degree(clampedX));
-			Ogre::Radian offsetX = radX - m_pCurSelection->getOrientation().getPitch();
-			q.FromAngleAxis(offsetX, Ogre::Vector3::UNIT_X);
-			q = q * m_pCurSelection->getOrientation();
-			m_pCurSelection->setOrientation(q);
-			return;
-		}
-
-		int clampedY = std::clamp(rotVec[1], -180, 180);
-		if (clampedY != int(m_pCurSelection->getOrientation().getYaw().valueDegrees()))
-		{
-			Ogre::Radian radY = Ogre::Radian(Ogre::Degree(clampedY));
-			Ogre::Radian offsetY = radY - m_pCurSelection->getOrientation().getYaw();
-			q.FromAngleAxis(offsetY, Ogre::Vector3::UNIT_Y);
-			q = q * m_pCurSelection->getOrientation();
-			m_pCurSelection->setOrientation(q);
-			return;
-		}
-
-		int clampedZ = std::clamp(rotVec[2], -180, 180);
-		if (clampedZ != int(m_pCurSelection->getOrientation().getRoll().valueDegrees()))
-		{
-			Ogre::Radian radZ = Ogre::Radian(Ogre::Degree(clampedZ));
-			Ogre::Radian offsetZ = radZ - m_pCurSelection->getOrientation().getRoll();
-			q.FromAngleAxis(offsetZ, Ogre::Vector3::UNIT_Z);
-			q = q * m_pCurSelection->getOrientation();
-			m_pCurSelection->setOrientation(q);
-			return;
-		}
-	}
-	else
-	{
-
-	}
-}
-
-
-void RenderEngine::DisplayMenuBar()
-{
 	
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu("File"))
-		{
-			if (ImGui::MenuItem("Save", "CTRL+S")) {}
-			if (ImGui::MenuItem("Load", "")) {}
-			if (ImGui::MenuItem("Export To Engine", "")) {}
-			ImGui::EndMenu();
-		}
-		ImGui::EndMainMenuBar();
-	}
-
-
+	m_pSceneManager->destroyQuery(query);
 }
+
+//void RenderEngine::StartGuiUpdate()
+//{
+//	ImGui_ImplOpenGL3_NewFrame();
+//	ImGui_ImplSDL2_NewFrame(m_SDL_Window);
+//	ImGui::NewFrame();
+//}
+
+//void RenderEngine::EndGuiUpdate()
+//{
+//	ImGui::Render();
+//	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+//	SDL_GL_SwapWindow(m_SDL_Window);	
+//}
+//
+//void RenderEngine::DisplayAllScripts()
+//{
+//	ImGui::Begin("Scripts");
+//	
+//	for (const auto& entry : std::filesystem::directory_iterator(m_pFileSystem->GetScriptsRoot()))
+//	{
+//		if (std::filesystem::is_regular_file(entry) && entry.path().extension() == ".lua")
+//		{
+//			std::string btnName = entry.path().filename().string();
+//			if (ImGui::Button(btnName.c_str()))
+//			{
+//				std::string command = "start " + entry.path().string();
+//				std::system(command.c_str());
+//			}
+//		}
+//	}
+//	ImGui::End();
+//}
+
+//void RenderEngine::DisplaySelectionParameters()
+//{
+//	if (m_pCurSelection)
+//	{
+//		ImGui::Begin("Parameters");
+//		ImGui::Text(m_pCurSelection->getName().c_str());
+//
+//		static float posVec[3] = { 0.f, 0.f, 0.f };
+//		posVec[0] = float(m_pCurSelection->getPosition().x);
+//		posVec[1] = float(m_pCurSelection->getPosition().y);
+//		posVec[2] = float(m_pCurSelection->getPosition().z);
+//		ImGui::InputFloat3("Position", posVec);
+//
+//		static int rotVec[3] = { 0, 0, 0 };
+//		rotVec[0] = int(m_pCurSelection->getOrientation().getPitch().valueDegrees());
+//		rotVec[1] = int(m_pCurSelection->getOrientation().getYaw().valueDegrees());
+//		rotVec[2] = int(m_pCurSelection->getOrientation().getRoll().valueDegrees());
+//		ImGui::InputInt3("Rotation", rotVec);
+//		ImGui::End();
+//
+//		m_pCurSelection->setPosition(posVec[0], posVec[1], posVec[2]);
+//
+//		Ogre::Quaternion q = m_pCurSelection->getOrientation();
+//		int clampedX = std::clamp(rotVec[0], -180, 180);
+//		if (clampedX != int(m_pCurSelection->getOrientation().getPitch().valueDegrees()))
+//		{
+//			Ogre::Radian radX = Ogre::Radian(Ogre::Degree(clampedX));
+//			Ogre::Radian offsetX = radX - m_pCurSelection->getOrientation().getPitch();
+//			q.FromAngleAxis(offsetX, Ogre::Vector3::UNIT_X);
+//			q = q * m_pCurSelection->getOrientation();
+//			m_pCurSelection->setOrientation(q);
+//			return;
+//		}
+//
+//		int clampedY = std::clamp(rotVec[1], -180, 180);
+//		if (clampedY != int(m_pCurSelection->getOrientation().getYaw().valueDegrees()))
+//		{
+//			Ogre::Radian radY = Ogre::Radian(Ogre::Degree(clampedY));
+//			Ogre::Radian offsetY = radY - m_pCurSelection->getOrientation().getYaw();
+//			q.FromAngleAxis(offsetY, Ogre::Vector3::UNIT_Y);
+//			q = q * m_pCurSelection->getOrientation();
+//			m_pCurSelection->setOrientation(q);
+//			return;
+//		}
+//
+//		int clampedZ = std::clamp(rotVec[2], -180, 180);
+//		if (clampedZ != int(m_pCurSelection->getOrientation().getRoll().valueDegrees()))
+//		{
+//			Ogre::Radian radZ = Ogre::Radian(Ogre::Degree(clampedZ));
+//			Ogre::Radian offsetZ = radZ - m_pCurSelection->getOrientation().getRoll();
+//			q.FromAngleAxis(offsetZ, Ogre::Vector3::UNIT_Z);
+//			q = q * m_pCurSelection->getOrientation();
+//			m_pCurSelection->setOrientation(q);
+//			return;
+//		}
+//	}
+//	else
+//	{
+//
+//	}
+//}
+
+
+//void RenderEngine::DisplayMenuBar()
+//{
+//	
+//	if (ImGui::BeginMainMenuBar())
+//	{
+//		if (ImGui::BeginMenu("File"))
+//		{
+//			if (ImGui::MenuItem("Save", "CTRL+S")) {}
+//			if (ImGui::MenuItem("Load", "")) {}
+//			if (ImGui::MenuItem("Export To Engine", "")) {}
+//			ImGui::EndMenu();
+//		}
+//		ImGui::EndMainMenuBar();
+//	}
+//
+//
+//}
 
 
 void RenderEngine::RT_Init()
@@ -262,7 +277,7 @@ void RenderEngine::RT_Init()
 
 		m_pRoot->initialise(false);
 
-		RT_InitSDL();
+		//RT_InitSDL();
 
 		// Creating window
 		Ogre::uint32 width = 1280;
@@ -293,43 +308,43 @@ void RenderEngine::RT_Init()
 	
 }
 
-void RenderEngine::RT_InitSDL()
-{
-	SDL_Init(SDL_INIT_VIDEO);
-
-	// GL 3.0 + GLSL 130
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-
-	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-	m_SDL_Window = SDL_CreateWindow("Dolor Engine ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
-
-	m_GL_Context = SDL_GL_CreateContext(m_SDL_Window);
-	SDL_GL_MakeCurrent(m_SDL_Window, m_GL_Context);
-	SDL_GL_SetSwapInterval(0);
-
-	IMGUI_CHECKVERSION();
-	m_pImGuiContext = ImGui::CreateContext();
-	ImGui::SetCurrentContext(m_pImGuiContext);
-
-	// Setup Dear ImGui style
-	ImGui::StyleColorsDark();
-
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-	io.WantCaptureKeyboard = true;
-	Ogre::LogManager::getSingleton().logMessage(std::to_string(io.WantCaptureKeyboard));
-
-	// Setup Platform/Renderer backends
-	ImGui_ImplSDL2_InitForOpenGL(m_SDL_Window, m_GL_Context);
-	bool f = ImGui_ImplOpenGL3_Init(SDL_GL_VERSION);
-}
+//void RenderEngine::RT_InitSDL()
+//{
+//	SDL_Init(SDL_INIT_VIDEO);
+//
+//	// GL 3.0 + GLSL 130
+//	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+//	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+//	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+//	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+//
+//	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+//	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+//	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+//
+//	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+//	m_SDL_Window = SDL_CreateWindow("Dolor Engine ", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+//
+//	m_GL_Context = SDL_GL_CreateContext(m_SDL_Window);
+//	SDL_GL_MakeCurrent(m_SDL_Window, m_GL_Context);
+//	SDL_GL_SetSwapInterval(0);
+//
+//	IMGUI_CHECKVERSION();
+//	m_pImGuiContext = ImGui::CreateContext();
+//	ImGui::SetCurrentContext(m_pImGuiContext);
+//
+//	// Setup Dear ImGui style
+//	ImGui::StyleColorsDark();
+//
+//	ImGuiIO& io = ImGui::GetIO(); (void)io;
+//
+//	io.WantCaptureKeyboard = true;
+//	Ogre::LogManager::getSingleton().logMessage(std::to_string(io.WantCaptureKeyboard));
+//
+//	// Setup Platform/Renderer backends
+//	ImGui_ImplSDL2_InitForOpenGL(m_SDL_Window, m_GL_Context);
+//	bool f = ImGui_ImplOpenGL3_Init(SDL_GL_VERSION);
+//}
 
 void RenderEngine::RT_MoveFB(float time, bool dir)
 {
@@ -375,18 +390,18 @@ void RenderEngine::RT_SetRotation(float diffX, float diffY)
 	m_pCamera->yaw(Ogre::Radian(diffX));
 }
 
-void RenderEngine::RT_SDLClenup()
-{
-	// Cleanup
-	ImGui::DestroyContext();
-	ImGui_ImplSDL2_Shutdown();
-	ImGui_ImplOpenGL3_Shutdown();
-	
-
-	SDL_GL_DeleteContext(m_GL_Context);
-	SDL_DestroyWindow(m_SDL_Window);
-	SDL_Quit();
-}
+//void RenderEngine::RT_SDLClenup()
+//{
+//	// Cleanup
+//	ImGui::DestroyContext();
+//	ImGui_ImplSDL2_Shutdown();
+//	ImGui_ImplOpenGL3_Shutdown();
+//	
+//
+//	SDL_GL_DeleteContext(m_GL_Context);
+//	SDL_DestroyWindow(m_SDL_Window);
+//	SDL_Quit();
+//}
 
 void RenderEngine::RT_SetupDefaultCamera()
 {
