@@ -65,6 +65,7 @@ private:
 	void RT_SetupDefaultLight();
 	void RT_CreateSceneNode(RenderNode* pRenderNode);
 	//void RT_InitSDL();
+	void RT_DeleteSceneNode();
 	void RT_MoveLR(float time, bool dir);
 	void RT_MoveFB(float time, bool dir);
 	void RT_MoveUD(float time, bool dir);

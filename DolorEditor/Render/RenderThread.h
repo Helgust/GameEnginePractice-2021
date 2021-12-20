@@ -20,6 +20,7 @@ enum RenderCommand : UINT32
 	eRC_SetupDefaultLight,
 	eRC_BeginFrame,
 	eRC_CreateSceneNode,
+	eRC_DeleteSceneNode,
 	eRC_SDLCleanup,
 	eRC_MoveLR,
 	eRC_MoveFB,
@@ -45,6 +46,7 @@ public:
 	void RC_BeginFrame();
 	void RC_EndFrame();
 	void RC_CreateSceneNode(RenderNode* pRenderNode);
+	void RC_DeleteSceneNode();
 	void RC_SDLCleanup();
 	void RC_MoveLR(float time, bool dir);
 	void RC_MoveFB(float time, bool dir);

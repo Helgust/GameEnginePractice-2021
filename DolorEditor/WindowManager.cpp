@@ -47,6 +47,14 @@ void WindowManager::ProcessSDLInput()
 	}
 }
 
+void WindowManager::DeleteScene()
+{
+	m_pRenderEngine->GetRT()->RC_DeleteSceneNode();
+	m_pEntityManager->ClearRenderNodes();
+	//m_pRenderEngine->GetSceneManager()->clearScene(true);
+		
+}
+
 void WindowManager::InitWindow() 
 {
 	const char* glsl_version = "#version 130";
@@ -118,7 +126,11 @@ void WindowManager::DisplayMenuBar()
 		if (ImGui::BeginMenu("File"))
 		{
 			if (ImGui::MenuItem("Save")) { m_pLoadingSystem->SaveToXML(m_pLoadingSystem->GetCurrSaveFile()); }
-			if (ImGui::MenuItem("Load", "")) {}
+			if (ImGui::MenuItem("Load", "")) 
+			{ 
+				DeleteScene();
+				m_pLoadingSystem->LoadFromXML("InitialScene.xml");
+			}
 			if (ImGui::MenuItem("Export to Engine", "")) { int status = m_pLoadingSystem->ExportToEngine(); }
 			ImGui::EndMenu();
 		}

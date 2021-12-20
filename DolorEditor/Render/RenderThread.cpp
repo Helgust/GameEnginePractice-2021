@@ -143,6 +143,13 @@ void RenderThread::ProcessCommands()
 			m_pRenderEngine->RT_CreateSceneNode(pRenderNode);
 			break;
 		}
+		case eRC_DeleteSceneNode:
+		{
+			//RenderNode* pRenderNode = ReadCommand<RenderNode*>(n);
+
+			m_pRenderEngine->RT_DeleteSceneNode();
+			break;
+		}
 		case eRC_SDLCleanup:
 		{
 			RenderNode* pRenderNode = ReadCommand<RenderNode*>(n);
@@ -298,6 +305,20 @@ void RenderThread::RC_CreateSceneNode(RenderNode* pRenderNode)
 
 	byte* p = AddCommand(eRC_CreateSceneNode, sizeof(RenderNode));
 	AddRawData(p, pRenderNode);
+}
+
+void RenderThread::RC_DeleteSceneNode()
+{
+	LOADINGCOMMAND_CRITICAL_SECTION;
+
+	if (IsRenderThread())
+	{
+		m_pRenderEngine->RT_DeleteSceneNode();
+		return;
+	}
+
+	byte* p = AddCommand(eRC_DeleteSceneNode,0);
+	//AddRawData(p, pRenderNode);
 }
 
 

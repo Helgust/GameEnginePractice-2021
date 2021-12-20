@@ -26,6 +26,7 @@ private:
 	LoadingSystem* m_pLoadingSystem;
 
 	void ProcessSDLInput();
+	void DeleteScene();
 
 	void InitWindow();
 	void InitImGui();

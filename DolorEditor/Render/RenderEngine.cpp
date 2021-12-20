@@ -56,7 +56,6 @@ bool RenderEngine::SetOgreConfig()
 void RenderEngine::Update()
 {
 	Ogre::WindowEventUtilities::messagePump();
-
 	for (RenderNode* pRenderNode : m_RenderNodes)
 	{
 		if (pRenderNode->GetStatic())
@@ -74,6 +73,7 @@ void RenderEngine::Update()
 			m_pCamera->lookAt(vPosition);
 		}
 	}
+	
 	
 	if (m_pRenderWindow->isVisible())
 	{
@@ -359,6 +359,8 @@ void RenderEngine::RT_MoveFB(float time, bool dir)
 }
 	
 
+
+
 void RenderEngine::RT_MoveLR(float time, bool dir)
 {
 	if(dir)
@@ -463,6 +465,15 @@ void RenderEngine::RT_CreateSceneNode(RenderNode* pRenderNode)
 
 	/*Ogre::LogManager::getSingleton().logMessage("RN_" + std::to_string(pRenderNode->GetId()));
 	Ogre::LogManager::getSingleton().logMessage("SN_" + std::to_string(pSceneNode->getId()));*/
+}
+
+void RenderEngine::RT_DeleteSceneNode()
+{
+	for (RenderNode* pRenderNode : m_RenderNodes)
+	{
+		m_pSceneManager->destroySceneNode(pRenderNode->GetSceneNode());
+	}
+	m_RenderNodes.clear();
 }
 
 void RenderEngine::ImportV1Mesh(Ogre::String strMeshName)

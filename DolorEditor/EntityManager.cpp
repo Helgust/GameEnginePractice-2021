@@ -38,7 +38,6 @@ EntityManager::~EntityManager()
 
 void EntityManager::ClearRenderNodes()
 {
-
 	m_sLevelName = "";
 	m_entityQueue.clear();
 }
