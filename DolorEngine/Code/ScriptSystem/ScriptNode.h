@@ -14,29 +14,29 @@
 #include "../ECS/ecsScript.h"
 #include "../FileSystem/GEFile.h"
 
-template <typename T>
-struct EnumWrapper
-{
-	static typename std::enable_if<std::is_enum<T>::value, void>::type push(lua_State* L, T value)
-	{
-		lua_pushnumber(L, static_cast<std::size_t> (value));
-	}
+//template <typename T>
+//struct EnumWrapper
+//{
+//	static typename std::enable_if<std::is_enum<T>::value, void>::type push(lua_State* L, T value)
+//	{
+//		lua_pushnumber(L, static_cast<std::size_t> (value));
+//	}
+//
+//	static typename std::enable_if<std::is_enum<T>::value, T>::type get(lua_State* L, int index)
+//	{
+//		return static_cast <T> (lua_tointeger(L, index));
+//	}
+//};
+//
+//namespace luabridge {
+//
+//	template <>
+//	struct luabridge::Stack <EInputCommand> : EnumWrapper <EInputCommand>
+//	{
+//	};
+//
+//}
 
-	static typename std::enable_if<std::is_enum<T>::value, T>::type get(lua_State* L, int index)
-	{
-		return static_cast <T> (lua_tointeger(L, index));
-	}
-};
-
-namespace luabridge {
-
-	template <>
-	struct luabridge::Stack <EInputCommand> : EnumWrapper <EInputCommand>
-	{
-	};
-
-}
-class GEFile;
 class ScriptNode
 {
 public:

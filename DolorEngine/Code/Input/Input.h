@@ -1,12 +1,5 @@
 #pragma once
+#include <vector>
+#include <string>
 
-enum EInputCommand : size_t
-{
-	eIC_TurnLeft = 0,
-	eIC_TurnRight,
-	eIC_MoveForward,
-	eIC_MoveBack,
-	eIC_HotReloadScript,
-
-	eIC_Max
-};
+extern std::vector<std::string> INPUTLIST;

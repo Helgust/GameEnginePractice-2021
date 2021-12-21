@@ -84,14 +84,6 @@ void RenderEngine::Update()
 		}
 	}
 
-	SDL_PumpEvents();
-	{
-		SDL_Event event;
-		while (SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_KEYDOWN, SDL_TEXTINPUT) > 0)
-		{
-			ImGui_ImplSDL2_ProcessEvent(&event);
-		}
-	}
 	StartGuiUpdate();
 
 	/*DisplayMenuBar();
@@ -148,7 +140,7 @@ void RenderEngine::DisplayAllScripts()
 			std::string btnName = entry.path().filename().string();
 			if (ImGui::Button(btnName.c_str()))
 			{
-				std::string command = "start notepad++ " + entry.path().string();
+				std::string command = "start " + entry.path().string();
 				std::system(command.c_str());
 			}
 		}
@@ -254,8 +246,8 @@ void RenderEngine::RT_InitSDL()
 
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-	io.WantCaptureKeyboard = true;
-	Ogre::LogManager::getSingleton().logMessage(std::to_string(io.WantCaptureKeyboard));
+	/*io.WantCaptureKeyboard = true;
+	Ogre::LogManager::getSingleton().logMessage(std::to_string(io.WantCaptureKeyboard));*/
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplSDL2_InitForOpenGL(m_SDL_Window, m_GL_Context);

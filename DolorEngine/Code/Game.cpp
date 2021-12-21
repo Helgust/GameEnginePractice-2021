@@ -59,10 +59,10 @@ void Game::Run()
 
 		if (m_pInputHandler)
 		{
-			m_pInputHandler->Update();
+			m_pInputHandler->Update(m_pRenderEngine->GetWindows());
 		}
 
-		if (GetKeyState(VK_F8) < 0)
+		if (m_pInputHandler->Get(SDL_SCANCODE_F8))
 		{
 			m_pEntityManager->ReloadScripts(m_pFileSystem);
 		}

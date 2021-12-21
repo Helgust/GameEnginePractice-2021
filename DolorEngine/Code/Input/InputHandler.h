@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Input.h"
-
 #include <string>
 #include <unordered_map>
 #include <bitset>
@@ -20,19 +18,13 @@ public:
 	InputHandler(const std::string& strResourceRoot);
 	~InputHandler();
 
-	void Update();
+	void Update(SDL_Window* window);
 
-	bool GetQuit() const { return m_bIsQuit; };
-	const std::bitset<eIC_Max>& GetInputState() const;
-	bool IsCommandActive(EInputCommand inputCommand) const;
+	bool Get(SDL_Scancode key) { return m_keyState.find(key) != m_keyState.end() ? m_keyState[key] : false; }
+	bool GetCommand(std::string command) const;
+	bool GetMouse(int key) { return m_mouseState.find(key) != m_mouseState.end() ? m_mouseState[key] : false; }
 
-	Ogre::Vector2 MousePos() const;
-	Ogre::Vector2 DeltaMousePos() const;
-	Ogre::Vector2 DeltaDownMousePos() const;
-	float GetMouseSensitivity() const { return m_pMouseSensitivity; }
-	bool GetLMouseStatus() const { return m_bLMouseButtonDown; };
-
-	void SetWinHandle(HWND window);
+	bool GetQuit() { return m_bIsQuit; }
 
 private:
 	void LoadConfiguration();
@@ -51,20 +43,15 @@ private:
 	bool m_bIsQuit;
 	std::string m_strMapFilePath;
 
-	typedef std::unordered_map<std::string, size_t> TCommandMap;
-	typedef std::unordered_map<std::string, int> TSymbolMap;
-	typedef std::unordered_map<int, size_t> TInputEventMap;
-	typedef std::unordered_map<std::string, std::string> TCommandSymbolMap;
+	std::map<std::string, std::string> m_command2key;
+	std::map<std::string, SDL_Scancode> m_key2code;
+	std::map<SDL_Scancode, bool> m_keyState;
 
-	TCommandMap m_commandMap;
-	TSymbolMap m_symbolMap;
-	TInputEventMap m_inputEventMap;
-	TCommandSymbolMap m_commandSymbolMap;
-
-	std::bitset<eIC_Max> m_InputState;
+	std::map<int, bool> m_mouseState;
 
 	bool m_bLMouseButtonDown;
 	bool m_bRMouseButtonDown;
+	bool m_bF8Down;
 
 	POINT m_pMousePoint;
 	Ogre::Vector2 m_pCurMousePos;

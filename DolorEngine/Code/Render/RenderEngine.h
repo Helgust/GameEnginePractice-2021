@@ -42,8 +42,9 @@ public:
 
 	void Update();
 
-	bool GetQuit() { return m_bQuit; }
-	void SetQuit(bool bQuit) { m_bQuit = bQuit; }
+	bool GetQuit() { return m_bQuit; };
+	void SetQuit(bool bQuit) { m_bQuit = bQuit; };
+	SDL_Window* GetWindows() { return m_SDL_Window; };
 
 	RenderThread* GetRT() const { return m_pRT; }
 

@@ -29,17 +29,17 @@ Entity.OnUpdate = function(dt)
     local deltaMoveVelocity = 0.0;
     local deltaRotationVelocity = 0.0;
     
-    if (inputHandler:isCommandActive(0)) then
+    if (inputHandler:isCommandActive("TurnLeft")) then
         deltaRotationVelocity = deltaRotationVelocity + Entity.Parameters.rotate_speed;
     end
-    if (inputHandler:isCommandActive(1)) then
+    if (inputHandler:isCommandActive("TurnRight")) then
         deltaRotationVelocity = deltaRotationVelocity - Entity.Parameters.rotate_speed;
     end
-    if (inputHandler:isCommandActive(2)) then
+    if (inputHandler:isCommandActive("MoveForward")) then
         deltaMoveVelocity = deltaMoveVelocity + Entity.Parameters.move_speed;
     end
-    if (inputHandler:isCommandActive(3)) then
-        deltaMoveVelocity = deltaMoveVelocity - Entity.Parameters.move_speed;
+    if (inputHandler:isCommandActive("MoveBack")) then
+        deltaMoveVelocity = deltaMoveVelocity + Entity.Parameters.move_speed;
     end
     
     deltaMoveVelocity = deltaMoveVelocity * dt;
